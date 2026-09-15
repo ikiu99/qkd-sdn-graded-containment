@@ -124,21 +124,12 @@ Exact versions the paper was produced with are pinned in
 | Table 3, baselines | `scripts/analyze.py --baselines` | `sweep_baselines` |
 | Table 4, hybrid | `scripts/report_struct.py` | `sweep_struct` |
 
-`scripts/figures.py` also generates several figures that are not in the paper
-(the feature ablation heat map, the score separation, the topology family, the
-frontier grid and others). They are kept because they are how the results were
-checked, and any of them can be regenerated from the same shipped parquet.
+`scripts/figures.py` also produces several figures that are not in the paper;
+they were how the results were checked and regenerate from the same file.
 
----
-
-## A note on what the oracle policy (B4) is
-
-B4 knows exactly which relays are compromised and isolates the ones the
-partition guard allows. It throttles nothing. It is therefore **not** an upper
-bound on damage prevented: a policy that also throttles can prevent more damage
-than B4 by admitting less traffic, and ours does on the tapping profile. B4
-bounds what perfect *detection* buys when spent on isolation alone. The only
-real ceiling on the damage reduction ratio is 1.
+Note that the oracle policy B4 isolates the compromised set and never throttles,
+so it is not an upper bound on damage prevented, only on what perfect detection
+buys when spent on isolation.
 
 ---
 
