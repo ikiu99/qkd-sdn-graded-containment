@@ -1,0 +1,57 @@
+topology: nsfnet
+km_mode: OTP
+horizon: 21600
+warmup: 1800
+seed_demand: 2
+targets:
+  low: 0.01
+  medium: 0.1
+  saturated: 0.3
+lam:
+  low: 0.174957
+  medium: 0.399902
+  saturated: 0.899779
+achieved_RR:
+  low: 0.0106
+  medium: 0.1016
+  saturated: 0.3198
+phi_lambda: 0.399902
+phi:
+- 0.0
+- 0.424302
+- 0.03937
+- 0.644702
+- 0.8465
+- 0.575613
+- 0.534848
+- 0.672895
+- 1.0
+- 0.692359
+- 0.222348
+- 0.398651
+- 0.073678
+- 0.08613
+score:
+  lam_s: 7.0
+  theta_0: 0.2047
+  targets:
+    s_lo: 0.45
+    s_hi: 0.7
+  evidence_floor:
+  - 0.1937
+  - 0.2367
+  - 0.1527
+  operating:
+    quiet: 0.1944
+    one_feature: 0.4631
+  prior_logit:
+    min: -1.6674
+    median: -0.5776
+    max: 0.0683
+  check:
+    quiet_max_prior: 0.4106
+    quiet_med_prior: 0.2675
+    quiet_min_prior: 0.1094
+    one_feature_med_prior: 0.7326
+    one_feature_min_prior: 0.4796
+    two_features_med_prior: 0.9888

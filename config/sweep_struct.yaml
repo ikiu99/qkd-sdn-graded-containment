@@ -1,0 +1,37 @@
+# Three structural changes, evaluated properly.
+#
+# 1. B8 - risk-triggered multipath.  Redundancy only for the sessions whose own
+#    path is likely to carry a compromised relay, swept over the trigger.
+# 2. The routing lever measured ALONE, with the quota lever turned nearly off
+#    (rho_start just below S_iso).  This is the experiment the earlier "kappa is
+#    inert" claim never ran: kappa was always measured in the presence of rho,
+#    which acts on the same node and dominates it.
+# 3. route_mode=logrisk against the phase 1 exp form, at matched kappa.
+#
+#   python -m sim.sweep --sweep config/sweep_struct.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+# --- reference -------------------------------------------------------------- #
+- {policy.type: B0, attack.enabled: true}
+- {policy.type: B0, attack.enabled: false}
+- {policy.type: B2, policy.m_paths: 2}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B4}
+# --- 1. the hybrid, swept over its trigger ---------------------------------- #
+- {policy.type: B8, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.hybrid_tau: 0.20, policy.m_paths: 2}
+- {policy.type: B8, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.hybrid_tau: 0.35, policy.m_paths: 2}
+- {policy.type: B8, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.hybrid_tau: 0.50, policy.m_paths: 2}
+- {policy.type: B8, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.hybrid_tau: 0.70, policy.m_paths: 2}
+# --- 2 and 3. the routing lever alone, both weight forms --------------------- #
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 0.0,  policy.route_mode: exp}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 3.0,  policy.route_mode: exp}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 10.0, policy.route_mode: exp}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 30.0, policy.route_mode: exp}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 3.0,  policy.route_mode: logrisk}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 10.0, policy.route_mode: logrisk}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.8999, policy.kappa: 30.0, policy.route_mode: logrisk}
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

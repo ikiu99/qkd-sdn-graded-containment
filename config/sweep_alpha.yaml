@@ -1,0 +1,12 @@
+# EWMA smoothing axis: the detection delay against false positive rate curve
+# (phase 1, section 8.2; phase 4, section 4.5).
+#
+#   python -m sim.sweep --sweep config/sweep_alpha.yaml --no-assert
+
+base: config/attack_t3_otp.yaml
+output_dir: results/raw
+
+axes:
+  detector.alpha: [0.01, 0.05, 0.2]
+  attack.profile: [G, L, E]
+  seed_attack: [3, 13, 23]

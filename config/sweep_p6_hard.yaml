@@ -1,0 +1,131 @@
+# Phase 6, block C - the same frontier against a much quieter attacker.
+#
+# At the phase 1 defaults profile L reaches AUC 1.000, which phase 4 section 0
+# itself calls a stop-and-fix condition.  gamma=0.10, delta=0.02 (a lie the size
+# of the report noise) and q=0.005 put the features near the bottom of the
+# healthy band, so the policy comparison faces an attacker that is genuinely
+# hard to see rather than a trivial one.
+#
+#   python -m sim.sweep --sweep config/sweep_p6_hard.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+- {policy.type: B0, attack.enabled: true, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B0, attack.enabled: true, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B0, attack.enabled: true, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B0, attack.enabled: false, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B0, attack.enabled: false, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B0, attack.enabled: false, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B4, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B4, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B4, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B1, policy.tau: 0.35, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B1, policy.tau: 0.35, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B1, policy.tau: 0.35, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B1, policy.tau: 0.5, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B1, policy.tau: 0.5, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B1, policy.tau: 0.5, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B1, policy.tau: 0.7, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B1, policy.tau: 0.7, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B1, policy.tau: 0.7, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B2, policy.m_paths: 2, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B2, policy.m_paths: 2, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B2, policy.m_paths: 2, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B2, policy.m_paths: 3, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B2, policy.m_paths: 3, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B2, policy.m_paths: 3, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.0, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: G,
+  attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: L,
+  attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.2374, policy.kappa: 0.0, attack.profile: E,
+  attack.q: 0.005, attack.s: 0.05}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: L, attack.delta: 0.02}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.26, policy.kappa: 0.0, attack.profile: E, attack.q: 0.005,
+  attack.s: 0.05}
+- {policy.type: BT, policy.rho_blind: 0.9, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: BT, policy.rho_blind: 0.9, attack.profile: L, attack.delta: 0.02}
+- {policy.type: BT, policy.rho_blind: 0.9, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: BT, policy.rho_blind: 0.75, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: BT, policy.rho_blind: 0.75, attack.profile: L, attack.delta: 0.02}
+- {policy.type: BT, policy.rho_blind: 0.75, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: BT, policy.rho_blind: 0.6, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: BT, policy.rho_blind: 0.6, attack.profile: L, attack.delta: 0.02}
+- {policy.type: BT, policy.rho_blind: 0.6, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+- {policy.type: BT, policy.rho_blind: 0.45, attack.profile: G, attack.gamma: 0.1}
+- {policy.type: BT, policy.rho_blind: 0.45, attack.profile: L, attack.delta: 0.02}
+- {policy.type: BT, policy.rho_blind: 0.45, attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+axes:
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

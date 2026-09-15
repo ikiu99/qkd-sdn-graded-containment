@@ -1,0 +1,13 @@
+# Baseline damage table: D_eff under B0 across profiles and compromise ratios.
+# This is the denominator of DRR in phase 5, so it has to exist before any
+# policy result means anything.
+#
+#   python -m sim.sweep --sweep config/sweep_damage.yaml --no-assert
+
+base: config/attack_t3_otp.yaml
+output_dir: results/raw
+
+axes:
+  attack.profile: [P, G, L, E]
+  attack.f: [0.05, 0.10, 0.20, 0.30]
+  seed_attack: [3, 13, 23, 33, 43]

@@ -1,0 +1,40 @@
+# Attack intensity against detectability.
+#
+# The three intensity parameters of phase 1 (gamma=0.30, delta=0.50, q=0.03) were
+# each chosen independently of the observation noise, and they land the three
+# features at wildly different difficulty: x2 on L reaches AUC 1.000 while x1 on
+# G only reaches 0.655.  Phase 4 section 0 declares AUC = 1.0 a stop-and-fix
+# condition; here the noise model is fine and the attack is simply too loud.
+#
+# This sweep measures where each feature actually sits, so the main comparison
+# can be run at intensities that make the four profiles comparably hard instead
+# of comparing a trivial profile against an impossible one.
+#
+#   python -m sim.sweep --sweep config/sweep_intensity.yaml --no-assert
+
+base: config/attack_t3_otp.yaml
+detector:
+  use_prior: false       # measuring the FEATURE, not the prior
+policy:
+  type: B0               # no feedback, so the seven-subset ablation stays exact
+output_dir: results/raw
+
+variants:
+  - {attack.profile: G, attack.gamma: 0.05}
+  - {attack.profile: G, attack.gamma: 0.10}
+  - {attack.profile: G, attack.gamma: 0.30}
+  - {attack.profile: G, attack.gamma: 0.60}
+  - {attack.profile: G, attack.gamma: 1.00}
+  - {attack.profile: L, attack.delta: 0.02}
+  - {attack.profile: L, attack.delta: 0.05}
+  - {attack.profile: L, attack.delta: 0.10}
+  - {attack.profile: L, attack.delta: 0.25}
+  - {attack.profile: L, attack.delta: 0.50}
+  - {attack.profile: E, attack.q: 0.002, attack.s: 0.02}
+  - {attack.profile: E, attack.q: 0.005, attack.s: 0.05}
+  - {attack.profile: E, attack.q: 0.010, attack.s: 0.10}
+  - {attack.profile: E, attack.q: 0.020, attack.s: 0.17}
+  - {attack.profile: E, attack.q: 0.030, attack.s: 0.25}
+
+axes:
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93]

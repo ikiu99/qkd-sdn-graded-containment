@@ -1,0 +1,26 @@
+# Raw per-run outputs: ~19,500 parquet files, about 1 GB.  They are regenerated
+# by `python -m sim.sweep` (see README) and every figure and table in the paper
+# is built from results/analysis.parquet, which IS tracked.
+results/raw/
+results/raw_L0_50/
+results/diagnostics/
+results/analysis_tmp.parquet
+
+# Generated figures are tracked (results/figures/) so a reader can compare
+# without running anything; nothing else under results/ is.
+
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+# LaTeX build products
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz

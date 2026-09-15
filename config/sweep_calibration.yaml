@@ -1,0 +1,17 @@
+# Load calibration sweep: rejection rate as a function of lambda, on B0 without
+# attack.  Used to read off the three load levels (low / medium / saturated) and
+# to sanity check that RR is monotone in lambda before calibrate.py bisects on it.
+#
+#   python -m sim.sweep --sweep config/sweep_calibration.yaml --no-assert
+#
+# 10 lambdas x 4 seeds = 40 runs at the 6 h sweep horizon of phase 1.
+
+base: config/base_t3_otp.yaml
+horizon: 21600          # 6 h, the sweep horizon (phase 1, section 1.4)
+warmup: 1800
+output_dir: results/raw
+
+axes:
+  demand.lam:
+    [0.02, 0.04, 0.06, 0.09, 0.12, 0.16, 0.20, 0.26, 0.32, 0.40]
+  seed_demand: [2, 12, 22, 32]

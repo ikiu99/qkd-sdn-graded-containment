@@ -1,0 +1,12 @@
+# Mandatory noise axis (phase 3, section 3.3): AUC against observation noise.
+# Shows the result does not depend on one lucky noise setting.
+#
+#   python -m sim.sweep --sweep config/sweep_noise.yaml --no-assert
+
+base: config/attack_t3_otp.yaml
+output_dir: results/raw
+
+axes:
+  noise.scale: [0.5, 1.0, 2.0]
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23]

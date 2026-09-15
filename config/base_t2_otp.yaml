@@ -1,0 +1,55 @@
+# T2 (USNET, 24 nodes / 43 links), KM-OTP, no attack, no detector, no policy.
+# This is baseline B0 - the reference every later comparison is measured against.
+
+horizon: 86400          # 24 h
+dt: 1.0
+warmup: 1800            # 30 min, nothing is recorded into metrics before this
+telemetry_period: 300.0
+
+seed_topology: 1
+seed_demand: 2
+seed_attack: 3
+seed_policy: 4
+
+topology:
+  name: usnet
+  path: data/topologies/usnet.json
+  R_max: 20000.0        # bit/s   (phase 1, section 1.3)
+  L_0: 21.7147            # km, = 10/(alpha*ln10), alpha = 0.2 dB/km
+  B_max: 10.0e6         # bit     (phase 1, section 1.4)
+
+demand:
+  lam: 0.304542      # medium load, RR ~10% (calibrate.py, 6 h horizon)
+  km_mode: OTP
+
+  # --- OTP session data rate -------------------------------------------------
+  # phase2-build-spec defaults are rate_min=1e3, rate_max=1e5 bit/s.  Those are
+  # incompatible with the key rate model of phase 1: with L in [20,120] km,
+  # R_e = 20000*exp(-L/50) lies in [1.8, 13.4] kbit/s, so a single 50 kbit/s OTP
+  # session (1 key bit per data bit per hop) consumes more than the entire
+  # network generates, and every session starves before it completes.
+  # OTP over QKD only supports low rate traffic; the range below keeps a typical
+  # session at ~1.7% of B_max and gives a load range where lambda can actually be
+  # calibrated to 1% / 10% / 30% rejection.  Delete these two lines to return to
+  # the literal spec values.
+  rate_min: 10.0        # bit/s
+  rate_max: 1000.0      # bit/s
+
+  T_s_min: 60.0         # s
+  T_s_max: 600.0        # s
+  admission: optimistic
+  T_adm: 60.0           # s look-ahead horizon
+
+routing:
+  K: 4
+  T_route: 300.0
+  disjoint_K: 3
+
+attack: {}              # phase 3
+detector:                # phase 4 - present but disabled, so this
+  enabled: false         # file hashes to the same scenario_id as its
+  lam_s: 8.0            # closed form, see calibrate.calibrate_score
+  theta_0: 0.1923
+policy: {}              # phase 5  -> NullPolicy == B0
+
+output_dir: results/raw

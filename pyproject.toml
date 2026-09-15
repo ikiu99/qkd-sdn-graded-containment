@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qkd-sdn-sim"
+version = "0.2.0"
+description = "SDN-based preemptive mitigation for compromised trusted relays in QKD networks - Phase 2 core simulator (no defense)"
+requires-python = ">=3.11"
+dependencies = [
+    "numpy>=1.26",
+    "networkx>=3.2",
+    "pyarrow>=14",
+    "pyyaml>=6",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "pandas>=2.1"]
+
+[tool.setuptools]
+packages = ["sim"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

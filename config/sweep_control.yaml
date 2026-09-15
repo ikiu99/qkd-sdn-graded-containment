@@ -1,0 +1,31 @@
+# The volume control: how much of a throttling policy's damage reduction is
+# targeting, and how much is simply admitting fewer sessions?
+#
+#   python -m sim.sweep --sweep config/sweep_control.yaml --no-assert
+#
+# BT throttles every node identically with no detection, so at a matched
+# rejection rate its DRR is the null hypothesis.  B3 k=0 removes the routing
+# weight lever and keeps the score-driven quota, isolating the contribution of
+# each lever.
+
+base: config/attack_t3_otp.yaml
+detector:
+  ablation: false
+attack:
+  f: 0.10
+output_dir: results/raw
+
+variants:
+  - {policy.type: B0}
+  - {policy.type: BT, policy.rho_blind: 0.90}
+  - {policy.type: BT, policy.rho_blind: 0.75}
+  - {policy.type: BT, policy.rho_blind: 0.60}
+  - {policy.type: BT, policy.rho_blind: 0.45}
+  - {policy.type: B3, policy.kappa: 3.0, policy.rho_start: 0.0}
+  - {policy.type: B3, policy.kappa: 0.0, policy.rho_start: 0.0}
+  - {policy.type: B3, policy.kappa: 3.0, policy.rho_start: 0.2576}
+
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93,
+                103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

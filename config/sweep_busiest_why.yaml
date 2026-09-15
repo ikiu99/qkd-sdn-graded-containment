@@ -1,0 +1,19 @@
+# NOTE: writes to results/diagnostics, NOT results/raw - these runs answer a
+# "why" question and must not join the pool the figures average over.
+# Why does the "busiest relays" cell read AUC 0.90 on the greedy profile when
+# the same cell with random selection reads 0.62?
+#
+# Two runs of the OFAT centre, prior off, ablation ON, differing only in
+# attack.selection.  The per-feature AUCs say which observable carries the
+# difference; the greedy profile is detected by x1, the key-accounting
+# residual, so if the story is "a thief on a busy node steals more in absolute
+# terms", x1 is where it has to show up.
+base: config/attack_t3_otp.yaml
+detector: {ablation: true}
+output_dir: results/diagnostics
+variants:
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.10, attack.selection: random, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.10, attack.selection: top_keyflow, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+axes:
+  attack.profile: [G]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

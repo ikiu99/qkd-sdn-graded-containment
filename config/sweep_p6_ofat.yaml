@@ -1,0 +1,116 @@
+# Phase 6, block B - one factor at a time around the central cell.
+#
+# Centre: net50 / KM-OTP / f=0.10 / medium load / selection=random / noise 1.0 /
+# alpha 0.05, which block A covers in full.  Each cell here moves exactly ONE
+# dimension off that centre, as phase 1 section 11 prescribes - the full
+# cartesian product would be ~29k runs and answers no question the OFAT design
+# does not.
+#
+# Each topology and key mode anchors rho_start to ITS OWN quiet score
+# (net50/OTP 0.1316, net50/AES 0.1301, nsfnet 0.2528, usnet 0.2207).
+# Using net50's anchor everywhere throttled the whole of nsfnet, whose
+# quiet network already sits at 0.25 - the lever was not comparable
+# across the cells it was supposed to be compared across.
+#
+# Only G and E are run: the weak-signal and strong-signal profiles bracket the
+# range, and P and G behave identically under every policy that needs a detector.
+#
+#   python -m sim.sweep --sweep config/sweep_p6_ofat.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B0, attack.enabled: true}
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B0, attack.enabled: false}
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B1, policy.tau: 0.5}
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B2, policy.m_paths: 2}
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B3, policy.S_iso: 0.5, policy.kappa: 0.0}
+- {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json, demand.lam: 0.399902, policy.rho_start: 0.2528,
+  policy.type: B4}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B0, attack.enabled: true}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B0, attack.enabled: false}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B1, policy.tau: 0.5}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B2, policy.m_paths: 2}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B3, policy.S_iso: 0.5, policy.kappa: 0.0}
+- {topology.name: usnet, topology.path: data/topologies/usnet.json, demand.lam: 0.304542, policy.rho_start: 0.2207,
+  policy.type: B4}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B0, attack.enabled: true}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B0, attack.enabled: false}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B1, policy.tau: 0.5}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B2, policy.m_paths: 2}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B3, policy.S_iso: 0.5,
+  policy.kappa: 0.0}
+- {demand.km_mode: AES, demand.lam: 21.708982, policy.rho_start: 0.1301, policy.type: B4}
+- {attack.f: 0.05, policy.type: B0, attack.enabled: true}
+- {attack.f: 0.05, policy.type: B0, attack.enabled: false}
+- {attack.f: 0.05, policy.type: B1, policy.tau: 0.5}
+- {attack.f: 0.05, policy.type: B2, policy.m_paths: 2}
+- {attack.f: 0.05, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {attack.f: 0.05, policy.type: B4}
+- {attack.f: 0.2, policy.type: B0, attack.enabled: true}
+- {attack.f: 0.2, policy.type: B0, attack.enabled: false}
+- {attack.f: 0.2, policy.type: B1, policy.tau: 0.5}
+- {attack.f: 0.2, policy.type: B2, policy.m_paths: 2}
+- {attack.f: 0.2, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {attack.f: 0.2, policy.type: B4}
+- {attack.f: 0.3, policy.type: B0, attack.enabled: true}
+- {attack.f: 0.3, policy.type: B0, attack.enabled: false}
+- {attack.f: 0.3, policy.type: B1, policy.tau: 0.5}
+- {attack.f: 0.3, policy.type: B2, policy.m_paths: 2}
+- {attack.f: 0.3, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {attack.f: 0.3, policy.type: B4}
+- {demand.lam: 0.138429, policy.type: B0, attack.enabled: true}
+- {demand.lam: 0.138429, policy.type: B0, attack.enabled: false}
+- {demand.lam: 0.138429, policy.type: B1, policy.tau: 0.5}
+- {demand.lam: 0.138429, policy.type: B2, policy.m_paths: 2}
+- {demand.lam: 0.138429, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {demand.lam: 0.138429, policy.type: B4}
+- {demand.lam: 0.553715, policy.type: B0, attack.enabled: true}
+- {demand.lam: 0.553715, policy.type: B0, attack.enabled: false}
+- {demand.lam: 0.553715, policy.type: B1, policy.tau: 0.5}
+- {demand.lam: 0.553715, policy.type: B2, policy.m_paths: 2}
+- {demand.lam: 0.553715, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {demand.lam: 0.553715, policy.type: B4}
+- {attack.selection: top_keyflow, policy.type: B0, attack.enabled: true}
+- {attack.selection: top_keyflow, policy.type: B0, attack.enabled: false}
+- {attack.selection: top_keyflow, policy.type: B1, policy.tau: 0.5}
+- {attack.selection: top_keyflow, policy.type: B2, policy.m_paths: 2}
+- {attack.selection: top_keyflow, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {attack.selection: top_keyflow, policy.type: B4}
+- {noise.scale: 0.5, policy.type: B0, attack.enabled: true}
+- {noise.scale: 0.5, policy.type: B0, attack.enabled: false}
+- {noise.scale: 0.5, policy.type: B1, policy.tau: 0.5}
+- {noise.scale: 0.5, policy.type: B2, policy.m_paths: 2}
+- {noise.scale: 0.5, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {noise.scale: 0.5, policy.type: B4}
+- {noise.scale: 2.0, policy.type: B0, attack.enabled: true}
+- {noise.scale: 2.0, policy.type: B0, attack.enabled: false}
+- {noise.scale: 2.0, policy.type: B1, policy.tau: 0.5}
+- {noise.scale: 2.0, policy.type: B2, policy.m_paths: 2}
+- {noise.scale: 2.0, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {noise.scale: 2.0, policy.type: B4}
+- {detector.alpha: 0.01, policy.type: B0, attack.enabled: true}
+- {detector.alpha: 0.01, policy.type: B0, attack.enabled: false}
+- {detector.alpha: 0.01, policy.type: B1, policy.tau: 0.5}
+- {detector.alpha: 0.01, policy.type: B2, policy.m_paths: 2}
+- {detector.alpha: 0.01, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {detector.alpha: 0.01, policy.type: B4}
+- {detector.alpha: 0.2, policy.type: B0, attack.enabled: true}
+- {detector.alpha: 0.2, policy.type: B0, attack.enabled: false}
+- {detector.alpha: 0.2, policy.type: B1, policy.tau: 0.5}
+- {detector.alpha: 0.2, policy.type: B2, policy.m_paths: 2}
+- {detector.alpha: 0.2, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {detector.alpha: 0.2, policy.type: B4}
+axes:
+  attack.profile: [G, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

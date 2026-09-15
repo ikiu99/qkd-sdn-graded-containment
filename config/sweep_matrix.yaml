@@ -1,0 +1,47 @@
+# Phase 6, the full experiment matrix: one factor at a time around a central
+# configuration, as phase 1 section 11 prescribes.
+#
+#   python -m sim.sweep --sweep config/sweep_matrix.yaml --no-assert
+#   python scripts/analyze.py --drr --psi --pareto --cost
+#
+# Central cell: T3 / KM-OTP / f=0.10 / medium load / profile G / random selection.
+# Each block below moves ONE dimension off that centre; the full cartesian
+# product would be ~29k runs and is neither necessary nor affordable.
+#
+# Three things that are easy to get wrong here:
+#
+#   * DRR needs a matched B0 for EVERY cell and PSI needs a matched
+#     B0-without-attack for every base scenario, so the policy axis is a ~6x
+#     multiplier plus a separate no-attack block.  That is budgeted below.
+#   * lambda is an INPUT, RR is an OUTPUT.  The calibrated lambda values are B0
+#     artifacts; under B2-strict the rejection rate jumps by the structural
+#     shortfall.  Hold lambda fixed and report RR as measured, or "medium load"
+#     reads as a controlled variable when it is not.
+#   * detector.ablation is off.  Scoring seven feature subsets from one evidence
+#     matrix is exact only while nothing feeds back, and a policy closes that
+#     loop.
+
+base: config/attack_t3_otp.yaml
+detector:
+  ablation: false
+output_dir: results/raw
+
+variants:
+  # ---- the policy axis, at the central cell -------------------------------
+  - {policy.type: B0, attack.enabled: true}
+  - {policy.type: B0, attack.enabled: false}         # the PSI baseline
+  - {policy.type: B1, policy.tau: 0.35}
+  - {policy.type: B1, policy.tau: 0.50}
+  - {policy.type: B2, policy.m_paths: 2}
+  - {policy.type: B2, policy.m_paths: 3}
+  - {policy.type: B3, policy.kappa: 3.0,  policy.S_iso: 0.5, policy.rho_start: 0.0}
+  - {policy.type: B3, policy.kappa: 10.0, policy.S_iso: 0.5, policy.rho_start: 0.0}
+  - {policy.type: B3, policy.kappa: 3.0,  policy.S_iso: 0.5, policy.rho_start: 0.2576}
+  - {policy.type: B3, policy.kappa: 10.0, policy.S_iso: 0.5, policy.rho_start: 0.2576}
+  - {policy.type: B4}
+
+axes:
+  attack.profile: [P, G, L, E]
+  attack.f: [0.05, 0.10, 0.20, 0.30]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93,
+                103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

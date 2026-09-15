@@ -1,0 +1,87 @@
+# Phase 3-4: T3 / KM-AES, compromised relays
+#
+#   python -m sim.runner --config config/attack_t3_aes.yaml --ablation
+#
+# 12 h horizon with t_c at 10800 s.  The detector samples from the end of the
+# metric warm-up (1800 s) and its 3600 s baseline window fills at 5370 s, so the
+# attack starts 1.5 h after the detector is warm and runs for 9 h.
+# hop every T_rk seconds, so the buffer is a much weaker bottleneck than in OTP
+# and the calibrated lambda is one to two orders of magnitude higher.
+
+horizon: 43200           # 12 h
+dt: 1.0
+warmup: 1800
+telemetry_period: 300.0
+
+seed_topology: 1
+seed_demand: 2
+seed_attack: 3
+seed_policy: 4
+
+topology:
+  name: net50
+  path: data/topologies/net50.json
+  R_max: 20000.0
+  L_0: 21.7147            # km, = 10/(alpha*ln10), alpha = 0.2 dB/km
+  B_max: 10.0e6
+
+demand:
+  lam: 21.708982      # medium load, RR ~10% (calibrate.py, 6 h horizon)
+  km_mode: AES
+  T_rk: 60.0            # s   re-keying period   (phase 1, section 2)
+  key_size: 256         # bit
+  T_s_min: 60.0
+  T_s_max: 600.0
+  admission: optimistic
+  T_adm: 60.0
+
+routing:
+  K: 4
+  T_route: 300.0
+  disjoint_K: 3
+
+attack: {}
+detector: {}
+policy: {}
+
+output_dir: results/raw
+
+# --- phase 3: attack injection ---------------------------------------------
+attack:
+  enabled: true
+  profile: P            # P passive | G greedy | L liar | E eavesdropper
+  f: 0.10               # fraction of compromised nodes
+  selection: random     # random | top_keyflow  - NEVER average the two
+  t_c: 10800            # 25% of the horizon, and well clear of the detector warm-up
+  gamma: 0.30           # G: extra key drained, as a fraction of the normal rate
+  delta: 0.50           # L: buffer over reporting factor
+  q: 0.03               # E: absolute QBER increase on the tapped link
+  s: 0.25               # E: relative SKR drop on the tapped link
+
+# --- phase 3: observation noise --------------------------------------------
+# Not optional.  With a noiseless observer every healthy node has K_obs == K_exp
+# exactly and every threshold scores AUC = 1.0.
+noise:
+  sigma_qber_rel: 0.10      # N1
+  sigma_skr_rel: 0.05       # N2
+  sigma_report_rel: 0.02    # N3
+  unmanaged_fraction: 0.10  # N4 - the only source of x1 residual on healthy nodes
+  scale: 1.0                # the noise sweep axis
+  qber_base_min: 0.015
+  qber_base_max: 0.030
+
+# --- phase 4: risk detector -------------------------------------------------
+detector:
+  enabled: true
+  T_sample: 30.0        # feature sampling
+  W_feat: 300.0         # overlapping feature window
+  W_base: 3600.0        # robust baseline -> 120 samples
+  W_ema: 1800.0         # per link EMA behind x3
+  z_max: 5.0
+  weights: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+  lam_s: 10.5            # closed form, see calibrate.calibrate_score
+  theta_0: 0.2450
+  alpha: 0.05
+  features: [x1, x2, x3]
+  use_prior: true
+  ablation: true

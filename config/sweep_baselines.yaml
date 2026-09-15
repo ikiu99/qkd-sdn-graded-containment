@@ -1,0 +1,61 @@
+# Comparison against published methods.
+#
+# B0-B4 and BT are all constructions of this paper.  Showing that our graded
+# policy beats our own binary one is an ablation, not a comparison with the
+# state of the art, and a reviewer is right to say so.  This block runs three
+# reimplementations of published methods on the same cell, the same seeds and
+# the same metric:
+#
+#   B5  Luo & Li, Entropy 27(11):1100, 2025
+#       edge-trust derating.  The only published method that detects a
+#       misbehaving relay from telemetry; its observable is the disagreement
+#       between the two endpoints' reports of a link, i.e. exactly our x2, with
+#       no analogue of x1 or x3.  beta_trust is swept so the baseline is
+#       reported at its own best operating point rather than at ours.
+#
+#   B6  Kiktenko, Tayduganov & Fedorov, Entropy 26(12):1102, 2024
+#       XOR shares over internally node-disjoint paths.  This is the scheme our
+#       B2 implements and it should be credited to them; what differs is the
+#       path selection, theirs by key-rate deficiency rather than hop count.
+#
+#   B7  Bi, Miao & Di, Applied Sciences 13:8690, 2023
+#       key-availability routing with no detection at all - the answer to
+#       "could good key-aware routing make a detector unnecessary?".
+#
+# Our own operating points are re-run here so the comparison is same-cell and
+# same-seed rather than joined across blocks.
+#
+#   python -m sim.sweep --sweep config/sweep_baselines.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+# --- reference ------------------------------------------------------------- #
+- {policy.type: B0, attack.enabled: true}
+- {policy.type: B0, attack.enabled: false}
+- {policy.type: B4}
+# --- published methods ------------------------------------------------------ #
+- {policy.type: B5, policy.beta_trust: 50.0}
+- {policy.type: B5, policy.beta_trust: 200.0}
+- {policy.type: B5, policy.beta_trust: 1000.0}
+- {policy.type: B5, policy.beta_trust: 5000.0}
+- {policy.type: B6, policy.m_paths: 2}
+- {policy.type: B6, policy.m_paths: 3}
+- {policy.type: B7, policy.alpha_key: 0.25}
+- {policy.type: B7, policy.alpha_key: 0.5}
+- {policy.type: B7, policy.alpha_key: 0.75}
+# --- ours, same cell -------------------------------------------------------- #
+- {policy.type: B1, policy.tau: 0.5}
+- {policy.type: B2, policy.m_paths: 2}
+- {policy.type: B2, policy.m_paths: 3}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.0, policy.kappa: 0.0}
+# --- the volume control, so targeting can be separated for all of them ------ #
+- {policy.type: BT, policy.rho_blind: 0.99}
+- {policy.type: BT, policy.rho_blind: 0.97}
+- {policy.type: BT, policy.rho_blind: 0.9}
+- {policy.type: BT, policy.rho_blind: 0.75}
+- {policy.type: BT, policy.rho_blind: 0.6}
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

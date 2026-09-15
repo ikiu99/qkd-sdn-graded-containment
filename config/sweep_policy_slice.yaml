@@ -1,0 +1,42 @@
+# Phase 6, headline slice: every policy on one scenario, 20 attack seeds.
+#
+#   python -m sim.sweep --sweep config/sweep_policy_slice.yaml --no-assert
+#   python scripts/analyze.py --drr --pareto --cost
+#
+# 20 seeds is not optional.  With f=0.2 on 14 nodes only 3 nodes are compromised,
+# and single-seed DRR on this scenario ranges from strongly negative to +0.44 -
+# a five-seed mean still has a confidence interval straddling zero.
+#
+# rho_start is swept because the two anchors are genuinely different operating
+# points, not a right and a wrong answer: 0.0 is the literal formula of phase 1
+# section 8.3, 0.2675 is the calibrated quiet score, which leaves an
+# ordinary-risk node untouched and spends the lever on the tail.
+#
+# Ablation is off throughout: the seven-subset shortcut is exact only while
+# nothing feeds back, and a policy closes that loop.
+
+base: config/attack_t1_otp.yaml
+detector:
+  ablation: false
+output_dir: results/raw
+
+variants:
+  - {policy.type: B0, attack.enabled: true}
+  - {policy.type: B0, attack.enabled: false}     # the PSI baseline
+  - {policy.type: B4, attack.enabled: true}
+  - {policy.type: B2, policy.m_paths: 2, attack.enabled: true}
+  - {policy.type: B2, policy.m_paths: 3, attack.enabled: true}
+  - {policy.type: B1, policy.tau: 0.35, attack.enabled: true}
+  - {policy.type: B1, policy.tau: 0.40, attack.enabled: true}
+  - {policy.type: B1, policy.tau: 0.50, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 3.0,  policy.S_iso: 0.5, policy.rho_start: 0.0, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 10.0, policy.S_iso: 0.5, policy.rho_start: 0.0, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 3.0,  policy.S_iso: 0.5, policy.rho_start: 0.2675, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 10.0, policy.S_iso: 0.5, policy.rho_start: 0.2675, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 3.0,  policy.S_iso: 0.4, policy.rho_start: 0.2675, attack.enabled: true}
+  - {policy.type: B3, policy.kappa: 0.0,  policy.S_iso: 0.5, policy.rho_start: 0.2675, attack.enabled: true}
+
+axes:
+  attack.profile: [P, G, L, E]
+  attack.f: [0.20]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

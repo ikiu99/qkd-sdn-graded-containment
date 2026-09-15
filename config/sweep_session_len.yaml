@@ -1,0 +1,68 @@
+# Session duration against the value of isolating early.
+#
+# Isolating a node blocks new admissions through it but lets sessions already
+# routed through it drain (``policy.tear_down_on_isolate: false``).  Measured on
+# the central cell the two settings differ by +-0.008 to 0.02 DRR, inside seed
+# noise - but that is a statement about *this* traffic model, not about QKD
+# networks.  Sessions here last 60-600 s against a 3 h post-t_c window, so the
+# in-flight population at the moment of isolation is a rounding error.  A network
+# carrying long-lived flows - a site-to-site tunnel, a storage replication link -
+# has the opposite ratio, and there the drain-versus-evict choice is the whole
+# of the policy's response time.
+#
+# lam is rescaled by the inverse of the mean session length at every point, so
+# the offered key load stays where the calibration put it and the axis is session
+# LENGTH rather than session length confounded with load:
+#
+#     E[T_s] = (T_s_min + T_s_max)/2      lam_k = lam_0 * E[T_s]_0 / E[T_s]_k
+#
+#   python -m sim.sweep --sweep config/sweep_session_len.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+# short: E[T_s] = 82.5 s, 4.0x the arrival rate
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B0, attack.enabled: true}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B0, attack.enabled: false}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B1, policy.tau: 0.5}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B1, policy.tau: 0.5,
+   policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0, policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 15.0, demand.T_s_max: 150.0, demand.lam: 0.913628, policy.type: B4}
+# spec: E[T_s] = 330 s
+- {policy.type: B0, attack.enabled: true}
+- {policy.type: B0, attack.enabled: false}
+- {policy.type: B1, policy.tau: 0.5}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B1, policy.tau: 0.5, policy.tear_down_on_isolate: true}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0,
+   policy.tear_down_on_isolate: true}
+- {policy.type: B4}
+# long: E[T_s] = 1320 s, a quarter of the arrival rate
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B0, attack.enabled: true}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B0, attack.enabled: false}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B1, policy.tau: 0.5}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B1, policy.tau: 0.5,
+   policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0, policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 240.0, demand.T_s_max: 2400.0, demand.lam: 0.057102, policy.type: B4}
+# very long: E[T_s] = 5400 s, comparable to the whole post-t_c window
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B0, attack.enabled: true}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B0, attack.enabled: false}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B1, policy.tau: 0.5}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B1, policy.tau: 0.5,
+   policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B3, policy.S_iso: 0.5,
+   policy.rho_start: 0.1316, policy.kappa: 0.0, policy.tear_down_on_isolate: true}
+- {demand.T_s_min: 1200.0, demand.T_s_max: 9600.0, demand.lam: 0.013958, policy.type: B4}
+axes:
+  attack.profile: [G, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

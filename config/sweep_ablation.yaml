@@ -1,0 +1,39 @@
+# Feature ablation: the diagonal table of phase 4, section 4.5.
+#
+#   python -m sim.sweep --sweep config/sweep_ablation.yaml --no-assert
+#   python scripts/report_phase34.py --ablation
+#
+# One run per parameter point scores ALL SEVEN feature subsets from the same
+# evidence matrix, so no separate run per subset is needed: under NullPolicy
+# nothing the detector produces feeds back into the simulation, which makes the
+# seven variants exact rather than an approximation of seven separate runs.
+#
+# Two axes here are reporting requirements, not conveniences:
+#
+#   attack.selection     random vs top_keyflow must be reported SEPARATELY.
+#                        Under top_keyflow the compromised nodes are by
+#                        construction the high-Phi ones, so the prior guesses
+#                        them for free (phase 4, section 4.4).
+#   detector.use_prior   the ablation measures FEATURE quality, so it is read
+#                        off the use_prior=false block; the use_prior=true block
+#                        is what shows the prior's own contribution, which is
+#                        the fourth sweep of phase 1 section 11.
+
+base: config/attack_t3_otp.yaml
+output_dir: results/raw
+
+variants:
+  - {topology.name: net50, topology.path: data/topologies/net50.json,
+     demand.lam: 0.228407}
+  - {topology.name: nsfnet, topology.path: data/topologies/nsfnet.json,
+     demand.lam: 0.399902}
+
+axes:
+  attack.profile: [P, G, L, E]
+  attack.selection: [random, top_keyflow]
+  detector.use_prior: [false, true]
+  # x2_mode is a before/after axis, not a tuning knob: "abs" is the literal
+  # formula of phase 1 section 5, "signed" attributes the link discrepancy to the
+  # end that is inflating.  Both are kept so the paper can show the improvement.
+  detector.x2_mode: [abs, signed]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93]

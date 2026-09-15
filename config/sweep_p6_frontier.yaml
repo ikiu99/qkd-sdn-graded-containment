@@ -1,0 +1,56 @@
+# Phase 6, block A - the headline frontier: S_iso x rho_start.
+#
+# Not S_iso x kappa.  The lever ablation showed kappa inert: DRR 0.835 / 0.844 /
+# 0.864 / 0.843 for kappa 0 / 3 / 10 / 20 even at S_iso=0.9 where no node is
+# isolated at all, while path length rose 15%.  kappa and rho act on the same
+# node and rho is the stronger instrument, so kappa is pinned at 0 and reported
+# as redundant.
+#
+# rho_start spans [0.0, 0.1316, 0.215, 0.2632] and every point means something:
+# 0.0 is the literal phase 1 formula (throttle everything in proportion to
+# score), 0.1316 is the measured MEAN score of a quiet network (throttle only
+# above ordinary risk), 0.215 is its 90th percentile (throttle only nodes a
+# quiet network would rarely reach), and 0.2632 is twice the mean (a wide dead
+# band).  All four are re-measured whenever the feature set changes.
+#
+# BT is the volume control - a uniform quota with no detection - so the targeting
+# benefit of a policy is its DRR minus BT's at a matched rejection rate.
+#
+#   python -m sim.sweep --sweep config/sweep_p6_frontier.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+- {policy.type: B0, attack.enabled: true}
+- {policy.type: B0, attack.enabled: false}
+- {policy.type: B4}
+- {policy.type: B1, policy.tau: 0.35}
+- {policy.type: B1, policy.tau: 0.5}
+- {policy.type: B1, policy.tau: 0.7}
+- {policy.type: B2, policy.m_paths: 2}
+- {policy.type: B2, policy.m_paths: 3}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.0, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.215, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.4, policy.rho_start: 0.2632, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.0, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.215, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.2632, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.0, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.215, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.7, policy.rho_start: 0.2632, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.0, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1316, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.215, policy.kappa: 0.0}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.2632, policy.kappa: 0.0}
+- {policy.type: BT, policy.rho_blind: 0.99}
+- {policy.type: BT, policy.rho_blind: 0.97}
+- {policy.type: BT, policy.rho_blind: 0.9}
+- {policy.type: BT, policy.rho_blind: 0.75}
+- {policy.type: BT, policy.rho_blind: 0.6}
+- {policy.type: BT, policy.rho_blind: 0.45}
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

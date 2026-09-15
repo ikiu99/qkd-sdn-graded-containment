@@ -1,0 +1,45 @@
+# T3 (net50, 50 nodes / 90 links), KM-AES, no attack, no detector, no policy.
+# Key consumption is decoupled from the data volume: one 256 bit re-key pulse per
+# hop every T_rk seconds, so the buffer is a much weaker bottleneck than in OTP
+# and the calibrated lambda is one to two orders of magnitude higher.
+
+horizon: 86400
+dt: 1.0
+warmup: 1800
+telemetry_period: 300.0
+
+seed_topology: 1
+seed_demand: 2
+seed_attack: 3
+seed_policy: 4
+
+topology:
+  name: net50
+  path: data/topologies/net50.json
+  R_max: 20000.0
+  L_0: 21.7147            # km, = 10/(alpha*ln10), alpha = 0.2 dB/km
+  B_max: 10.0e6
+
+demand:
+  lam: 21.708982      # medium load, RR ~10% (calibrate.py, 6 h horizon)
+  km_mode: AES
+  T_rk: 60.0            # s   re-keying period   (phase 1, section 2)
+  key_size: 256         # bit
+  T_s_min: 60.0
+  T_s_max: 600.0
+  admission: optimistic
+  T_adm: 60.0
+
+routing:
+  K: 4
+  T_route: 300.0
+  disjoint_K: 3
+
+attack: {}
+detector:                # present but disabled, so this file hashes to
+  enabled: false         # the same scenario_id as its attack/policy
+  lam_s: 10.5            # closed form, see calibrate.calibrate_score
+  theta_0: 0.2450
+policy: {}
+
+output_dir: results/raw

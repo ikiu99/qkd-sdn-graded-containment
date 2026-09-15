@@ -1,0 +1,36 @@
+# Data the figures need that no earlier sweep left on disk.
+#
+# Two blocks, both small:
+#
+# 1. kappa 0/3/10/20 at S_iso=0.9.  The lever ablation that declared kappa inert
+#    was run before the frontier was re-cut, and only kappa 0 and 3 survive in
+#    results/raw.  S_iso=0.9 is the cell that makes the point: no node is
+#    isolated there, so kappa is the only lever still acting and the reading is
+#    not contaminated by isolation.
+#
+# 2. x2_mode: abs.  The absolute-value form of the neighbour-discrepancy feature
+#    is the *before* half of the F2 disambiguation figure.  It is scored with the
+#    ablation detector and no prior, so the figure compares features rather than
+#    priors.
+#
+#   python -m sim.sweep --sweep config/sweep_figures.yaml --no-assert
+base: config/attack_t3_otp.yaml
+output_dir: results/raw
+variants:
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 0.0,
+   detector.ablation: false}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 3.0,
+   detector.ablation: false}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 10.0,
+   detector.ablation: false}
+- {policy.type: B3, policy.S_iso: 0.9, policy.rho_start: 0.1187, policy.kappa: 20.0,
+   detector.ablation: false}
+- {policy.type: B0, attack.enabled: true, detector.ablation: false}
+- {policy.type: B0, attack.enabled: false, detector.ablation: false}
+- {policy.type: B0, detector.x2_mode: abs, detector.ablation: true,
+   detector.use_prior: false}
+- {policy.type: B0, detector.x2_mode: signed, detector.ablation: true,
+   detector.use_prior: false}
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

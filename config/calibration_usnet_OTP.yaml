@@ -1,0 +1,67 @@
+topology: usnet
+km_mode: OTP
+horizon: 21600
+warmup: 1800
+seed_demand: 2
+targets:
+  low: 0.01
+  medium: 0.1
+  saturated: 0.3
+lam:
+  low: 0.137996
+  medium: 0.304542
+  saturated: 0.913626
+achieved_RR:
+  low: 0.0096
+  medium: 0.1015
+  saturated: 0.2942
+phi_lambda: 0.304542
+phi:
+- 0.024447
+- 0.202811
+- 0.452643
+- 0.174215
+- 0.148046
+- 0.227054
+- 0.461912
+- 0.357699
+- 0.973802
+- 0.527853
+- 0.4621
+- 0.611527
+- 0.356439
+- 1.0
+- 0.616245
+- 0.379906
+- 0.533723
+- 0.285372
+- 0.157983
+- 0.169822
+- 0.312572
+- 0.202755
+- 0.194377
+- 0.0
+score:
+  lam_s: 8.0
+  theta_0: 0.1923
+  targets:
+    s_lo: 0.45
+    s_hi: 0.7
+  evidence_floor:
+  - 0.1405
+  - 0.1622
+  - 0.1455
+  operating:
+    quiet: 0.1494
+    one_feature: 0.4359
+  prior_logit:
+    min: -1.4969
+    median: -0.7765
+    max: 0.1394
+  check:
+    quiet_max_prior: 0.4099
+    quiet_med_prior: 0.2175
+    quiet_min_prior: 0.1191
+    one_feature_med_prior: 0.7333
+    one_feature_min_prior: 0.5723
+    two_features_med_prior: 0.989

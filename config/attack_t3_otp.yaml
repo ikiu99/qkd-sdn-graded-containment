@@ -1,0 +1,97 @@
+# Phase 3-4: T3 / KM-OTP, compromised relays
+#
+#   python -m sim.runner --config config/attack_t3_otp.yaml --ablation
+#
+# 12 h horizon with t_c at 10800 s.  The detector samples from the end of the
+# metric warm-up (1800 s) and its 3600 s baseline window fills at 5370 s, so the
+# attack starts 1.5 h after the detector is warm and runs for 9 h.
+
+horizon: 43200           # 12 h
+dt: 1.0
+warmup: 1800            # 30 min, nothing is recorded into metrics before this
+telemetry_period: 300.0
+
+seed_topology: 1
+seed_demand: 2
+seed_attack: 3
+seed_policy: 4
+
+topology:
+  name: net50
+  path: data/topologies/net50.json
+  R_max: 20000.0        # bit/s   (phase 1, section 1.3)
+  L_0: 21.7147            # km, = 10/(alpha*ln10), alpha = 0.2 dB/km
+  B_max: 10.0e6         # bit     (phase 1, section 1.4)
+
+demand:
+  lam: 0.228407      # medium load, RR ~10% (calibrate.py, 6 h horizon)
+  km_mode: OTP
+
+  # --- OTP session data rate -------------------------------------------------
+  # phase2-build-spec defaults are rate_min=1e3, rate_max=1e5 bit/s.  Those are
+  # incompatible with the key rate model of phase 1: with L in [20,120] km,
+  # R_e = 20000*exp(-L/50) lies in [1.8, 13.4] kbit/s, so a single 50 kbit/s OTP
+  # session (1 key bit per data bit per hop) consumes more than the entire
+  # network generates, and every session starves before it completes.
+  # OTP over QKD only supports low rate traffic; the range below keeps a typical
+  # session at ~1.7% of B_max and gives a load range where lambda can actually be
+  # calibrated to 1% / 10% / 30% rejection.  Delete these two lines to return to
+  # the literal spec values.
+  rate_min: 10.0        # bit/s
+  rate_max: 1000.0      # bit/s
+
+  T_s_min: 60.0         # s
+  T_s_max: 600.0        # s
+  admission: optimistic
+  T_adm: 60.0           # s look-ahead horizon
+
+routing:
+  K: 4
+  T_route: 300.0
+  disjoint_K: 3
+
+attack: {}              # phase 3
+detector: {}            # phase 4
+policy: {}              # phase 5  -> NullPolicy == B0
+
+output_dir: results/raw
+
+# --- phase 3: attack injection ---------------------------------------------
+attack:
+  enabled: true
+  profile: P            # P passive | G greedy | L liar | E eavesdropper
+  f: 0.10               # fraction of compromised nodes
+  selection: random     # random | top_keyflow  - NEVER average the two
+  t_c: 10800            # 25% of the horizon, and well clear of the detector warm-up
+  gamma: 0.30           # G: extra key drained, as a fraction of the normal rate
+  delta: 0.50           # L: buffer over reporting factor
+  q: 0.03               # E: absolute QBER increase on the tapped link
+  s: 0.25               # E: relative SKR drop on the tapped link
+
+# --- phase 3: observation noise --------------------------------------------
+# Not optional.  With a noiseless observer every healthy node has K_obs == K_exp
+# exactly and every threshold scores AUC = 1.0.
+noise:
+  sigma_qber_rel: 0.10      # N1
+  sigma_skr_rel: 0.05       # N2
+  sigma_report_rel: 0.02    # N3
+  unmanaged_fraction: 0.10  # N4 - the only source of x1 residual on healthy nodes
+  scale: 1.0                # the noise sweep axis
+  qber_base_min: 0.015
+  qber_base_max: 0.030
+
+# --- phase 4: risk detector -------------------------------------------------
+detector:
+  enabled: true
+  T_sample: 30.0        # feature sampling
+  W_feat: 300.0         # overlapping feature window
+  W_base: 3600.0        # robust baseline -> 120 samples
+  W_ema: 1800.0         # per link EMA behind x3
+  z_max: 5.0
+  weights: [0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+  lam_s: 10.5            # closed form, see calibrate.calibrate_score
+  theta_0: 0.2447
+  alpha: 0.05
+  features: [x1, x2, x3]
+  use_prior: true
+  ablation: true
