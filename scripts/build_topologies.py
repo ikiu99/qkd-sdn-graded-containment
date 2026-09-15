@@ -1,6 +1,6 @@
 """Generate the three topology JSON files under data/topologies/.
 
-Run:  python scripts/build_topologies.py
+Run: python scripts/build_topologies.py
 
 Design note (stated in the paper's method section)
 --------------------------------------------------
@@ -8,27 +8,27 @@ The secure key rate model is
 
     R_e = R_max * exp(-L_e / L_0)
 
-and L_0 is NOT a free parameter.  Secret key rate scales with channel
+and L_0 is NOT a free parameter. Secret key rate scales with channel
 transmittance eta = 10^(-alpha L / 10), so
 
     L_0 = 10 / (alpha * ln 10) = 21.71 km   at alpha = 0.2 dB/km,
 
 the standard 1550 nm single-mode fibre attenuation assumed throughout the QKD
-networking literature.  (The phase 1 spec's 50 km would imply alpha = 0.087
+networking literature. (The phase 1 spec's 50 km would imply alpha = 0.087
 dB/km, below the Rayleigh scattering limit of silica: no such fibre exists.)
 
 With the *geographic* span of NSFNET / USNET (600-2800 km) the model yields no
 usable key on any link, which is the physical reason trusted-relay QKD networks
-exist at all: individual QKD links are short.  The reference topologies are used
+exist at all: individual QKD links are short. The reference topologies are used
 here for their *connectivity* - literature comparability - while link lengths
 are linearly rescaled into [8.7, 52.1] km, preserving the
-relative ordering.  That range is where deployed metropolitan QKD networks
+relative ordering. That range is where deployed metropolitan QKD networks
 actually sit (Tokyo QKD Network 1-45 km; Hefei 46-node metro; MadQCI Madrid),
 and it gives R_e in [1.8, 13.4] kbit/s - a dynamic range in which buffers,
 admission and starvation are all meaningful.
 
 The adjacency lists below follow commonly used variants of NSFNET-14 and a
-24-node US mesh.  They live in plain JSON files, so swapping in the exact edge
+24-node US mesh. They live in plain JSON files, so swapping in the exact edge
 list of whichever citation the paper uses is a one-file edit and requires no
 code change.
 """
@@ -48,9 +48,7 @@ SEED_TOPOLOGY = 1
 OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                        "data", "topologies")
 
-# --------------------------------------------------------------------------- #
 # T1 - NSFNET, 14 nodes / 21 links
-# --------------------------------------------------------------------------- #
 NSFNET_NODES = [
     ("Seattle", 47.61, -122.33),
     ("Palo Alto", 37.44, -122.14),
@@ -73,9 +71,7 @@ NSFNET_EDGES = [
     (10, 11), (10, 13), (11, 12),
 ]
 
-# --------------------------------------------------------------------------- #
 # T2 - USNET, 24 nodes / 43 links
-# --------------------------------------------------------------------------- #
 USNET_NODES = [
     ("Seattle", 47.61, -122.33),
     ("Portland", 45.52, -122.68),
@@ -136,7 +132,7 @@ def _qber_unit(n_edges: int) -> list[float]:
     Phase 3 section 3.2 wants qber_base_e ~ U(0.015, 0.030) from rng_topology.
     Storing the *unit* draw rather than the rate keeps the range a sweepable
     config parameter (noise.qber_base_min / max) while the per edge ordering
-    stays frozen with the topology.  Its own substream, so adding it does not
+    stays frozen with the topology. Its own substream, so adding it does not
     move the exposure values drawn above.
     """
     rng = np.random.default_rng([SEED_TOPOLOGY, 99])
@@ -146,9 +142,9 @@ def _qber_unit(n_edges: int) -> list[float]:
 def _exposure(n: int, rng: np.random.Generator) -> list[float]:
     """Physical protection level per node, 0 = hardened datacentre, 1 = remote site.
 
-    phase1-model-spec section 13 leaves this open for phase 2; it is drawn once
+    The span distribution is a modelling choice rather than a given; it is drawn once
     per topology from rng_topology and frozen into the JSON so every run of every
-    phase sees exactly the same node exposure.  Unused in phase 2.
+    phase sees exactly the same node exposure. Unused in phase 2.
     """
     return [round(float(x), 4) for x in rng.random(n)]
 
@@ -159,7 +155,7 @@ def connectivity_stats(edge_pairs, n_nodes: int) -> dict:
     ``frac_ge_m`` is the ceiling on policy B2: it relays XOR key shares over m
     node-disjoint paths and rejects a demand outright when fewer than m exist,
     so this fraction bounds B2's acceptance rate before key supply is even
-    considered.  Having it in the data file means a reader can tell a structural
+    considered. Having it in the data file means a reader can tell a structural
     rejection from a key shortage without re-deriving the graph.
     """
     G = nx.Graph()
@@ -255,18 +251,18 @@ def build_net50(n: int, target_edges: int, rng) -> dict:
 def biconnect(chosen: set, d, n: int, target_edges: int):
     """Make the graph 2-node-connected, then trim back to ~target_edges.
 
-    Why this is not optional.  MST + shortest-fill leaves articulation points:
+    Why this is not optional. MST + shortest-fill leaves articulation points:
     the 50 node graph came out with 4 degree-1 nodes and 15 cut vertices, and
     only 17.4% of node pairs had two node-disjoint paths (both reference
-    topologies have 100%).  Policy B2 relays XOR key shares over node-disjoint
+    topologies have 100%). Policy B2 relays XOR key shares over node-disjoint
     paths, so on such a graph it would reject 83% of demands for a reason that
     is a property of this generator rather than of the policy - and the phase 5
     partition guard would veto roughly a third of B1's isolations for the same
-    reason.  Real QKD backbones are laid out 2-connected precisely so that no
+    reason. Real QKD backbones are laid out 2-connected precisely so that no
     single trusted relay is a single point of failure.
 
     Augmentation walks the block-cut tree: each added edge joins two *leaf*
-    blocks, which strictly reduces their number, so the loop terminates.  Among
+    blocks, which strictly reduces their number, so the loop terminates. Among
     all such pairs the shortest is taken, which keeps the mesh geometric.
     Redundant long edges are then dropped so the edge count stays comparable to
     the pre-augmentation graph, keeping the average degree - and therefore the

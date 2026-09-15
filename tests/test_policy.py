@@ -39,9 +39,7 @@ def policy_for(kind, **over):
     return cfg, topo, pol
 
 
-# --------------------------------------------------------------------------- #
 # the hysteresis state machine, as a pure function
-# --------------------------------------------------------------------------- #
 def _drive(series, hi=0.5, lo=0.4, dwell=0.0, dt=1.0):
     n = 1
     prev = np.zeros(n, dtype=bool)
@@ -93,9 +91,7 @@ def test_sawtooth_across_the_band_does_not_flap_every_tick():
     assert no_band > with_band
 
 
-# --------------------------------------------------------------------------- #
 # partition guard
-# --------------------------------------------------------------------------- #
 @pytest.fixture(scope="module")
 def graph():
     return load_topology(load_config(BASE).topology).G
@@ -163,9 +159,7 @@ def test_guard_prefers_the_higher_risk_node(graph):
     pytest.skip("no such pair on this topology")
 
 
-# --------------------------------------------------------------------------- #
 # the information boundary
-# --------------------------------------------------------------------------- #
 def test_policy_isolation():
     """Only B4 may see ground truth; B0-B3 decide from S_bar and t alone."""
     n = 14
@@ -224,9 +218,7 @@ def test_b0_draws_nothing_from_the_policy_stream():
         assert not dec.isolated.any()
 
 
-# --------------------------------------------------------------------------- #
 # end to end behaviour
-# --------------------------------------------------------------------------- #
 def test_no_attack_means_no_damage_under_every_policy():
     for kind in ("B0", "B1", "B2", "B3", "B4"):
         res = run({"policy.type": kind, "attack.enabled": False})
@@ -269,7 +261,7 @@ def test_isolation_blocks_new_admissions_through_the_node():
     """Isolation closes the door; it does not evict traffic already inside.
 
     An operator does not kill live sessions on suspicion, so a session admitted
-    before its relay was isolated runs to completion through it.  That leaves a
+    before its relay was isolated runs to completion through it. That leaves a
     tail of up to T_s_max, which is measured rather than assumed: with
     ``tear_down_on_isolate`` the invariant becomes exact, and the damage
     difference between the two is about 1-2%.

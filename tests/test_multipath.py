@@ -1,9 +1,9 @@
 """Phase 5: XOR key sharing over node-disjoint legs (policy B2).
 
-The exposure rule is the dangerous part.  ``_mark_exposed`` used to be an OR over
+The exposure rule is the dangerous part. ``_mark_exposed`` used to be an OR over
 the whole path; under XOR the correct rule is ALL over the legs and ANY within a
 leg - the exact opposite - and getting it backwards would overstate the paper's
-headline metric with no error and no failing test anywhere.  It is therefore
+headline metric with no error and no failing test anywhere. It is therefore
 checked exhaustively against a closed form rather than spot-checked.
 """
 from __future__ import annotations
@@ -40,7 +40,6 @@ def session_with(legs):
                    key_rate=1.0, next_rekey=float("inf"))
 
 
-# --------------------------------------------------------------------------- #
 def test_xor_exposure_truth_table():
     """Every compromise mask on a 6-node two-leg session, against the closed form.
 
@@ -81,7 +80,6 @@ def test_single_leg_reduces_to_any_over_the_path():
         assert relay == (i in (1, 2))
 
 
-# --------------------------------------------------------------------------- #
 def test_legs_are_node_disjoint_in_a_full_run():
     res = run({"policy.type": "B2", "policy.m_paths": 2,
                "attack.profile": "G", "attack.f": 0.2})

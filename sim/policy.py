@@ -1,27 +1,25 @@
 """Response policies B0-B4.
 
-Phase 5 reference: sections 8.3 and 10 of phase1-model-spec.
-
     B0  no defence - the reference every comparison is measured against
-    B1  binary: isolate at a fixed threshold on the same S_bar.  This is the
+    B1  binary: isolate at a fixed threshold on the same S_bar. This is the
         state of the art and the industrial patents, so it is given the same
         hysteresis and dwell timer as B3 - a baseline that flaps is a strawman.
     B2  static multipath: XOR key shares over m node-disjoint paths, with no
-        detection at all.  Security by redundancy rather than by detection.
+        detection at all. Security by redundancy rather than by detection.
     B3  graded continuous response (the proposal): three levers driven by one
         score, with rho reaching zero exactly at S_iso so throttling and
         isolation meet continuously.
-    B4  oracle: perfect knowledge of V_c.  The achievable upper bound - it is
+    B4  oracle: perfect knowledge of V_c. The achievable upper bound - it is
         still subject to the partition guard, because isolating a cut vertex is
         not something any policy can do.
 
-Information boundary.  ``apply`` receives the score and the time, and nothing
-else.  Phase 4 established that the detector may not read privileged state, and
+Information boundary. ``apply`` receives the score and the time, and nothing
+else. Phase 4 established that the detector may not read privileged state, and
 the policy sits on the same side of that line; B4's ground truth arrives through
 an explicitly injected ``oracle`` callable so the one place that cheats is
-visible.  ``test_policy_isolation`` enforces it.
+visible. ``test_policy_isolation`` enforces it.
 
-No policy draws a random number.  ``rng_policy`` is already consumed by the
+No policy draws a random number. ``rng_policy`` is already consumed by the
 admission quota test, and a second consumer would shift those draws and
 contaminate the comparison; every tie here is broken on node id instead.
 """
@@ -52,15 +50,13 @@ class PolicyDecision:
     hybrid: tuple = (1.0, 1)  # (risk trigger, legs) for per-session redundancy
 
 
-# --------------------------------------------------------------------------- #
 # shared mechanics, as pure functions so they can be tested without a simulator
-# --------------------------------------------------------------------------- #
 def hysteresis_step(S_bar: np.ndarray, prev: np.ndarray, since: np.ndarray,
                     t: float, hi: float, lo: float, dwell: float):
     """One step of the isolate/release state machine.
 
     Rise at ``hi``, fall at ``lo = hi - hysteresis``, and no transition until the
-    node has held its current state for ``dwell`` seconds.  Without this a score
+    node has held its current state for ``dwell`` seconds. Without this a score
     hovering at the threshold flaps every tick, which costs a route table
     rebuild each time and makes the binary baseline look worse than it is.
     """
@@ -81,12 +77,12 @@ def partition_guard(G: nx.Graph, want: np.ndarray, S_bar: np.ndarray):
 
     Candidates are taken in DESCENDING risk with an explicit node-id tiebreak -
     ties are common, since during detector warm-up every node sits at exactly
-    its prior.  Descending order gives the highest-risk node first refusal;
+    its prior. Descending order gives the highest-risk node first refusal;
     isolating a low-risk node first could turn a high-risk one into a cut
-    vertex.  This is a monotone-in-risk heuristic, not an optimum: the sets
+    vertex. This is a monotone-in-risk heuristic, not an optimum: the sets
     whose removal keeps G connected do not form a matroid.
 
-    Two conditions, not one.  The graph minus the isolated set must stay
+    Two conditions, not one. The graph minus the isolated set must stay
     connected, AND every isolated node must keep at least one non-isolated
     neighbour - isolation means "no longer a relay", not "off the network", so a
     node cut off entirely would have its own demands rejected as unreachable and
@@ -110,11 +106,10 @@ def partition_guard(G: nx.Graph, want: np.ndarray, S_bar: np.ndarray):
     return accepted, vetoed
 
 
-# --------------------------------------------------------------------------- #
 class BasePolicy(Policy):
     """Hysteresis, dwell, partition guard and the counters every policy reports."""
 
-    # Does this policy act on S_bar?  If it does, it must not act before the
+    # Does this policy act on S_bar? If it does, it must not act before the
     # detector is warm: until then SuspicionDetector returns the prior alone,
     # and under selection='top_keyflow' the prior correlates with the
     # compromised set by construction - a policy driven by it would look
@@ -176,7 +171,7 @@ class BasePolicy(Policy):
         """Per-edge routing cost multiplier, or None to leave it at one.
 
         B0-B4 steer by NODE weight, which is all the graded policy's kappa lever
-        needs.  The literature baselines weight LINKS - by their own remaining
+        needs. The literature baselines weight LINKS - by their own remaining
         key, or by their key-generation rate - and that is not expressible as a
         node weight, so it gets its own hook.
         """
@@ -233,7 +228,6 @@ class BasePolicy(Policy):
         }
 
 
-# --------------------------------------------------------------------------- #
 class NoDefencePolicy(BasePolicy):
     """B0. Plain shortest path, no throttling, no isolation."""
 
@@ -241,7 +235,7 @@ class NoDefencePolicy(BasePolicy):
 class BinaryPolicy(BasePolicy):
     """B1. Hard isolation at a fixed threshold on the same S_bar as B3.
 
-    Equivalent to the existing literature and to the industrial patents.  Given
+    Equivalent to the existing literature and to the industrial patents. Given
     the same hysteresis and dwell timer as B3 on purpose: the interesting claim
     is that a *graded* response beats a well-implemented binary one, not that it
     beats a flapping one.
@@ -257,7 +251,7 @@ class MultipathPolicy(BasePolicy):
     """B2. XOR key shares over m node-disjoint paths, with no detection at all.
 
     Security by redundancy: the attacker learns nothing unless it holds a relay
-    on every leg.  The cost is m-fold key consumption and a rejection whenever
+    on every leg. The cost is m-fold key consumption and a rejection whenever
     the graph cannot supply m node-disjoint paths.
     """
 
@@ -269,10 +263,10 @@ class BlindThrottlePolicy(BasePolicy):
     """BT - the volume control. Uniform rho everywhere, no detection at all.
 
     Not one of the five policies of phase 1; it exists to separate two effects
-    that any throttling policy mixes together.  Admitting fewer sessions reduces
+    that any throttling policy mixes together. Admitting fewer sessions reduces
     exposure *mechanically*, whether or not the throttle is aimed at anything:
     a policy that rejects half the traffic cuts damage roughly in half while
-    targeting nothing.  So a DRR of 0.76 bought with a 54 point rise in
+    targeting nothing. So a DRR of 0.76 bought with a 54 point rise in
     rejection is not 0.76 of detection value.
 
     BT throttles every node identically at ``rho_blind``, which makes it the
@@ -299,10 +293,10 @@ class GradedPolicy(BasePolicy):
 
     rho still reaches zero exactly at S_iso, so throttling and isolation join
     continuously and share a single parameter - the property phase 1 section 8.3
-    is built around.  What changes is where throttling *starts*.
+    is built around. What changes is where throttling *starts*.
 
     The spec writes rho = max(0, 1 - S_bar/S_iso), which anchors rho = 1 at
-    S_bar = 0.  With a configuration prior in the score no node is ever at zero:
+    S_bar = 0. With a configuration prior in the score no node is ever at zero:
     measured on T1, every healthy node sat at S_bar ~ 0.22, so every node in the
     network got rho ~ 0.56 and B3 became a blanket 44% throttle that raised the
     rejection rate by 26 points while separating compromised from healthy nodes
@@ -328,16 +322,16 @@ class GradedPolicy(BasePolicy):
         does on the same node and more strongly, so there is nothing left for it
         to steer away from.
 
-        ``logrisk`` is the objective the damage model implies.  Routing cost
+        ``logrisk`` is the objective the damage model implies. Routing cost
         sums 0.5*(w_u + w_v) over the edges of a path, so every interior node
         contributes w_i exactly once and the path cost becomes
 
             hops + kappa * sum over interior of -log(1 - S_bar)
 
         Minimising that maximises the probability the whole path is clean, which
-        is what exposure depends on.  The practical difference is the shape: a
+        is what exposure depends on. The practical difference is the shape: a
         node at S_bar = 0.9 costs 2.3*kappa here and diverges as S_bar -> 1,
-        where exp(kappa*S) merely doubles.  A single very suspect relay can
+        where exp(kappa*S) merely doubles. A single very suspect relay can
         therefore be routed around, which is the case that matters.
         """
         s = np.clip(S_bar, 0.0, 1.0)
@@ -356,27 +350,27 @@ class HybridPolicy(GradedPolicy):
     """B8. Graded throttling, plus redundancy for the sessions that need it.
 
     B2 pays for XOR redundancy on every session whether or not anything is
-    wrong; B3 pays nothing but can only act on evidence.  The paper's own
+    wrong; B3 pays nothing but can only act on evidence. The paper's own
     conclusion is that the two are complements, and this is the policy that
-    makes them one.  A session is relayed over ``m_paths`` node-disjoint legs
+    makes them one. A session is relayed over ``m_paths`` node-disjoint legs
     only when the cheapest single path it would otherwise take is itself
     suspect:
 
         P(path carries a compromised relay) = 1 - prod(1 - S_bar_i)
                                               over the interior nodes
 
-    and that exceeds ``hybrid_tau``.  Everything else takes one path.
+    and that exceeds ``hybrid_tau``. Everything else takes one path.
 
     The trigger is cumulative rather than the maximum along the path because
     exposure needs only *one* compromised relay, so a long path through
     moderately suspect nodes is genuinely more dangerous than a short path
-    through one - and the maximum cannot tell them apart.  The cost is an
+    through one - and the maximum cannot tell them apart. The cost is an
     assumption: it reads ``S_bar`` as a probability, which it is not exactly,
-    being a calibrated posterior rather than a frequency.  It is monotone in the
+    being a calibrated posterior rather than a frequency. It is monotone in the
     right direction, which is what a trigger needs.
 
     When the trigger fires but the graph has no ``m_paths`` node-disjoint set,
-    the session is admitted on one path rather than rejected.  That is the
+    the session is admitted on one path rather than rejected. That is the
     weaker security choice and the deliberate one: refusing would turn a
     detection policy into an availability outage exactly on the sparse
     topologies where disjoint paths are scarce, which is the failure mode that
@@ -397,7 +391,7 @@ class OraclePolicy(BasePolicy):
 
     Still subject to the partition guard: isolating a cut vertex is impossible
     for any policy, so an oracle that ignored the guard would be an unachievable
-    bound rather than a useful one.  No hysteresis is needed, since ground truth
+    bound rather than a useful one. No hysteresis is needed, since ground truth
     does not flap, but the dwell machinery is inherited and harmless.
     """
 
@@ -419,20 +413,18 @@ class OraclePolicy(BasePolicy):
         return want
 
 
-# --------------------------------------------------------------------------- #
 # Literature baselines.
 #
 # B0-B4 and BT are all constructions of this paper, which makes any comparison
 # between them self-referential: showing that our graded policy beats our own
-# binary one is an ablation, not a comparison with the state of the art.  The
+# binary one is an ablation, not a comparison with the state of the art. The
 # three policies below are reimplementations of published methods, so that the
 # claim has something outside this work to stand against.
 #
 # Every one of them is an ADAPTATION and the departures are listed in each
-# docstring.  None of the three was published against this threat model - key
+# docstring. None of the three was published against this threat model - key
 # material stolen by a compromised relay - so a faithful port is impossible in
 # principle; what is ported is each method's decision rule.
-# --------------------------------------------------------------------------- #
 class TrustDeratePolicy(BasePolicy):
     """B5. Edge-trust derating, after Luo & Li, *Entropy* 27(11):1100, 2025.
 
@@ -442,13 +434,13 @@ class TrustDeratePolicy(BasePolicy):
               * exp( -beta * ( (G_e^A + S_e^A) - (G_e^B + S_e^B) )^2 )
 
     and it multiplies the link's usable key-pool capacity in the flow
-    constraint, so a suspect link is *derated* rather than removed.  Two things
+    constraint, so a suspect link is *derated* rather than removed. Two things
     are worth saying plainly about it, because they are what makes this a
     baseline rather than a rival:
 
     * The second factor is exactly our ``x2``: the two endpoints of a link
       report its key state separately, and an honest-honest pair agrees while an
-      honest-malicious pair does not.  Their detector is that one observable.
+      honest-malicious pair does not. Their detector is that one observable.
       They have no analogue of ``x1`` (key-accounting residual) or ``x3``
       (quantum-layer deviation), which is the gap this paper is about.
     * It is memoryless - recomputed from scratch every round, with no EWMA and
@@ -456,9 +448,9 @@ class TrustDeratePolicy(BasePolicy):
       rather than on the smoothed score ``S_bar``.
 
     ADAPTED, and the paper must say so: the first factor counts Byzantine
-    witness acknowledgements from their causal-consistency layer.  This
+    witness acknowledgements from their causal-consistency layer. This
     simulator has no consensus protocol and no equivocating control plane, so
-    that factor cannot be reproduced and is dropped.  What remains is their
+    that factor cannot be reproduced and is dropped. What remains is their
     trust *mechanism* measured against our threat model, which is the honest
     comparison: it is the published method that comes closest to detecting a
     compromised relay from telemetry, and the question is how far one observable
@@ -491,25 +483,25 @@ class NonOverlappingMultipathPolicy(MultipathPolicy):
     Their scheme is the same one B2 implements - a key split into XOR shares,
     one per internally node-disjoint path, so that an adversary must hold a
     relay on *every* path - and B2 should be credited to them rather than
-    presented as ours.  What is theirs and not ours is the **path selection**:
+    presented as ours. What is theirs and not ours is the **path selection**:
     B2 takes the minimum-cost disjoint set (fewest hops), while their Algorithm
     1 picks the set minimising
 
         D(P^M) = max over paths, max over links, of ( T_ij - R_eff_ij )
 
     i.e. the set whose worst link has the smallest key-rate deficiency, and then
-    debits every link it used so the next demand avoids it.  It is water-filling
+    debits every link it used so the next demand avoids it. It is water-filling
     on the key supply, not shortest path.
 
     ADAPTED, twice, and both need stating:
 
     * Their algorithm enumerates **every simple path** between a pair and then
-      every M-subset of non-overlapping ones.  That is exponential, and their
+      every M-subset of non-overlapping ones. That is exponential, and their
       own evaluation runs at N = 6 and N = 10 nodes; at N = 50 it does not
-      terminate.  Selection here is over the same min-cost-flow machinery B2
+      terminate. Selection here is over the same min-cost-flow machinery B2
       uses, with the link cost replaced by a deficiency surrogate.
     * Their deficiency is defined against a *target rate matrix* solved offline
-      for a whole period.  Online, the standing analogue of "this link is short
+      for a whole period. Online, the standing analogue of "this link is short
       of key" is its own generation rate, so the surrogate cost is R_max / R_e:
       a link that generates little key is expensive, which is the same ordering
       their D(P^M) induces, without the global optimisation.
@@ -530,7 +522,7 @@ class KeyAwareRoutingPolicy(BasePolicy):
 
     A routing baseline with no detection at all, included to answer the obvious
     objection that a good key-aware routing algorithm might make a detector
-    unnecessary.  Their link weight (their Eq. 12) is
+    unnecessary. Their link weight (their Eq. 12) is
 
         W_ij = alpha * K_ij^t + beta * P_ij,      alpha + beta = 1,
 
@@ -545,9 +537,9 @@ class KeyAwareRoutingPolicy(BasePolicy):
     ADAPTED: their Eq. 12 as printed adds the blocking probability to the key
     term and then *maximises* the sum, which would prefer the more congested
     link; read as a benefit score it must be the availability ``1 - P`` that
-    enters, and that is what is implemented.  The paper does not give values for
+    enters, and that is what is implemented. The paper does not give values for
     alpha and beta beyond ``alpha + beta = 1``, so ``policy.alpha_key`` is a
-    swept parameter here and defaults to 0.5.  ``lambda`` is the link's key
+    swept parameter here and defaults to 0.5. ``lambda`` is the link's key
     demand relative to its key supply, which is the quantity their "blocking
     intensity" measures in a key-limited network.
 

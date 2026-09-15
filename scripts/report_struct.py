@@ -4,15 +4,15 @@
 
 Reports, in order:
 
-1.  B8, risk-triggered multipath, against the two policies it is built from.
+1. B8, risk-triggered multipath, against the two policies it is built from.
     The question is not whether it beats them on damage - B2 is unbeatable on
     damage and ruinous on key - but whether it buys most of B2's protection for
     a fraction of B2's key.
-2.  The routing lever measured ALONE, with the quota lever turned nearly off.
+2. The routing lever measured ALONE, with the quota lever turned nearly off.
     This is the experiment behind the "kappa is inert" claim, which was only
     ever measured in the presence of rho; rho acts on the same node and
     dominates it, so the earlier reading confounded the two.
-3.  route_mode=logrisk against the phase 1 exp form at matched kappa.
+3. route_mode=logrisk against the phase 1 exp form at matched kappa.
 """
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def report_hybrid(d: pd.DataFrame) -> None:
               f"{ratio:>10.2f}" if np.isfinite(ratio)
               else f"    {lab:<22}{drr:>10.3f}{k:>11.3f}{'free':>10}")
     print("\n    B2 is unbeatable on damage and ruinous on key; B3 is free and")
-    print("    blind on half the threat model.  The hybrid is worth having only")
+    print("    blind on half the threat model. The hybrid is worth having only")
     print("    if it is close to B2 on damage at a fraction of B2's key.")
 
 

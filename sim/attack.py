@@ -1,18 +1,16 @@
 """Compromised relay attack: ground truth plus the four behavioural profiles.
 
-Phase 3 reference: section 3.4 of phase3-4-build-spec.
-
 Each profile switches on exactly one detection feature, and that one to one
 correspondence is what makes the ablation table of phase 4 meaningful:
 
     P  passive       nothing observable changes      -> no feature
     G  greedy        extra key drained off ledger    -> F1  (x1)
     L  liar          over reports adjacent buffers   -> F2  (x2)
-    E  eavesdropper  taps one adjacent link          -> F3  (x3)
+    E  eavesdropper taps one adjacent link          -> F3  (x3)
 
 Profile P is the control condition and is *deliberately* undetectable: in this
 implementation it provably changes nothing in the simulated dynamics, so a run
-with profile P is bit identical to a run with no attack at all.  An AUC near 0.5
+with profile P is bit identical to a run with no attack at all. An AUC near 0.5
 there is the correct result, not a failure.
 
 Determinism contract: the compromised set V_c is drawn **before** any profile
@@ -57,7 +55,7 @@ class CompromiseAttack(Attack):
             victims = np.empty(0, dtype=np.int64)
         elif cfg.selection == "random":
             # degree-1 nodes stay in the draw: excluding them would bias the
-            # sample.  They are reported separately in the analysis instead,
+            # sample. They are reported separately in the analysis instead,
             # because their D_raw is structurally zero.
             victims = rng.choice(n_nodes, size=n_c, replace=False)
         elif cfg.selection == "top_keyflow":
@@ -104,7 +102,7 @@ class CompromiseAttack(Attack):
             self.lie_edges = np.empty(0, dtype=np.int64)
             self.lie_sides = np.empty(0, dtype=np.int64)
 
-        # profile G: EMA of the managed consumption rate per edge.  Tracked from
+        # profile G: EMA of the managed consumption rate per edge. Tracked from
         # t=0 so the attacker already has a baseline when it switches on.
         self._baseline = np.zeros(topo.n_edges, dtype=float)
         self._prev_ledger = np.zeros(topo.n_edges, dtype=float)
@@ -120,11 +118,9 @@ class CompromiseAttack(Attack):
         # consumption without taking a second full sum over the buffers
         self.last_drain = 0.0
 
-    # ------------------------------------------------------------------ #
     def compromised_nodes(self, t: float) -> np.ndarray:
         return self._mask if t >= self.t_c else self._zero_mask
 
-    # ------------------------------------------------------------------ #
     def apply(self, state: NetworkState, t: float) -> None:
         if self.profile == "G":
             self._track_baseline(state)
@@ -167,7 +163,7 @@ class CompromiseAttack(Attack):
         """Profile G: siphon gamma times the edge's normal managed rate.
 
         Never recorded in ledger_consumed, which is exactly what produces the
-        x1 residual.  An edge carrying no traffic is drained by nothing: the
+        x1 residual. An edge carrying no traffic is drained by nothing: the
         attacker has nothing to steal there.
         """
         if self.adj_edges.size == 0:
@@ -179,7 +175,6 @@ class CompromiseAttack(Attack):
         state.actual_consumed += take
         self.last_drain = float(take.sum())
 
-    # ------------------------------------------------------------------ #
     def observe(self, state: NetworkState, t: float) -> None:
         """Tamper with the reports after the honest observation model ran.
 

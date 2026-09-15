@@ -1,11 +1,8 @@
 """Mutable simulation state.
 
-Phase 2 reference: section 2 of phase2-build-spec.
-Phase 3 reference: section 3.1 of phase3-4-build-spec.
-
 Naming rule, mandatory from phase 3 on: every observable exists twice, as
 ``*_true`` (only the simulator knows it) and ``*_obs`` (what the controller
-sees).  The phase 4 detector may read **only** the ``_obs`` family plus
+sees). The phase 4 detector may read **only** the ``_obs`` family plus
 ``buffer_reported`` and ``ledger_consumed``; touching ``*_true``,
 ``buffers`` or ``compromised`` is a bug, and ``test_detector_isolation``
 enforces it.
@@ -49,7 +46,7 @@ class Session:
         """Total hops over every leg - the key-cost measure.
 
         Under B2 this is m times a single leg, because each leg carries a
-        full-size XOR share.  Path *stretch* is ``mean_leg_len`` in metrics.py,
+        full-size XOR share. Path *stretch* is ``mean_leg_len`` in metrics.py,
         deliberately a separate quantity: folding the m-fold replication into
         stretch would correlate the two Pareto axes, and replication already
         shows up in KPD and RR.
@@ -97,9 +94,9 @@ class NetworkState:
     rho: np.ndarray                  # (|V|,) rate quota, all one under NullPolicy
     isolated: np.ndarray             # (|V|,) bool, all False under NullPolicy
     n_paths: int = 1                 # legs per session; >1 only under B2
-    # B8 only.  hybrid_tau < 1 turns on the risk trigger: a session whose
+    # B8 only. hybrid_tau < 1 turns on the risk trigger: a session whose
     # cheapest single path exceeds this cumulative compromise probability
-    # is relayed over hybrid_m XOR legs instead.  It lives on the state
+    # is relayed over hybrid_m XOR legs instead. It lives on the state
     # rather than being passed down because admission is the only place
     # that knows which path a given session would actually take.
     hybrid_tau: float = 1.0
@@ -138,11 +135,11 @@ class NetworkState:
     D_raw_hops: float = 0.0          # key bits summed over compromised-incident hops
 
     # Relay-only exposure: the same quantities counting ONLY sessions where a
-    # compromised node acts as an intermediate.  A session whose own endpoint is
+    # compromised node acts as an intermediate. A session whose own endpoint is
     # compromised is exposed no matter how it is routed - the attacker owns one
     # end of it - so that part of D_eff is a floor no relay policy can touch, and
     # mixing the two would cap DRR at a value set by the traffic matrix rather
-    # than by the policy.  D_eff stays the headline metric; D_eff_relay is what
+    # than by the policy. D_eff stays the headline metric; D_eff_relay is what
     # measures what a policy can actually do.
     exposed_rate_relay: float = 0.0
     exposed_key_rate_relay: float = 0.0
@@ -232,7 +229,7 @@ def recompute_exposure_relay(state: NetworkState) -> tuple[float, float]:
 
 
 def assert_invariants(state: NetworkState, topo: Topology, deep: bool = False) -> None:
-    """Runtime invariants, section 6 of phase2-build-spec."""
+    """The four runtime invariants, checked every tick under --no-assert=false."""
     assert np.all(state.buffers >= -1e-6), "negative key buffer"
     assert np.all(state.buffers <= topo.B_max + 1e-6), "buffer above B_max"
     assert np.all(state.edge_rate >= -1e-6), "negative aggregate consumption rate"

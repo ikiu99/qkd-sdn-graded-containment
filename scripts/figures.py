@@ -5,11 +5,11 @@
 
 One rule runs through the whole file and it is the only thing that makes the
 numbers comparable: **a figure may only pool runs that differ in the axis it is
-plotting**.  results/raw holds fourteen sweeps on top of each other - the
+plotting**. results/raw holds fourteen sweeps on top of each other - the
 frontier grid, the OFAT block, the intensity sweep, the ablation block, phase 8 -
-and most of them share the same central cell.  Averaging a policy over "every
+and most of them share the same central cell. Averaging a policy over "every
 row at net50" silently mixes four rho_start anchors, five attack intensities and
-runs with the prior switched off.  ``cell()`` below pins everything that is not
+runs with the prior switched off. ``cell()`` below pins everything that is not
 being varied; each figure then relaxes exactly one pin.
 
 The figures are deliberately plain: no gradients, no 3-D, no dual-encoded colour.
@@ -49,15 +49,12 @@ plt.rcParams.update({
 })
 
 
-# --------------------------------------------------------------------------- #
-# --------------------------------------------------------------------------- #
 # Plain-language naming.
 #
 # The internal names are short because the code says them a thousand times; a
-# figure says each one once, to a reader who has not read the code.  Everything
+# figure says each one once, to a reader who has not read the code. Everything
 # below exists so that a reader can take one image out of the paper and still
 # know what it is about.
-# --------------------------------------------------------------------------- #
 POLICY_LABEL = {
     "B0": "No defence",
     "B1": "Threshold\n(isolate at a line)",
@@ -91,14 +88,14 @@ def frame_damage(ax, key=False):
     """Draw the floor and the ceiling so a number can be judged.
 
     Damage prevented is DRR = 1 - D/D_0: zero when the policy prevents nothing,
-    one when it prevents all of it.  Those two are the frame, and the band
+    one when it prevents all of it. Those two are the frame, and the band
     between them is the room a policy actually has.
 
-    This used to draw the ORACLE as the ceiling, which was wrong.  The oracle
+    This used to draw the ORACLE as the ceiling, which was wrong. The oracle
     isolates the compromised set and throttles nothing, so a policy that also
     throttles prevents more damage than the oracle by admitting less traffic -
     ours does, on the tapping adversary - and a reference line the data crosses
-    is worse than no reference line at all.  The oracle is still reported, as a
+    is worse than no reference line at all. The oracle is still reported, as a
     row in the tables, where it is a measurement rather than a claim about what
     is possible.
 
@@ -152,7 +149,7 @@ def cell(df, *, topo="net50", km="OTP", f=0.10, spec=True, prior=None,
 
 
 def op(d, pol, **kw):
-    """One policy at one operating point.  Without this every B3 curve is an
+    """One policy at one operating point. Without this every B3 curve is an
     average over four rho_start anchors, which is not an operating point."""
     d = d[d["policy.type"] == pol]
     for k, v in kw.items():
@@ -178,7 +175,7 @@ def _strip_titles(fig):
     """Drop the in-figure headline, keep real subplot labels.
 
     The manuscript repeats it verbatim in the LaTeX caption directly below, and
-    a reviewer reading both sees the same sentence twice.  Axes titles that name
+    a reviewer reading both sees the same sentence twice. Axes titles that name
     a panel rather than the figure ("profile G greedy") are kept, so the
     heuristic is: remove the figure suptitle, and remove an axes title only if
     it opens with the figure tag Fn.
@@ -235,9 +232,7 @@ def _w(v):
     return tuple(round(float(x), 2) for x in v)
 
 
-# --------------------------------------------------------------------------- #
 # 1. detection
-# --------------------------------------------------------------------------- #
 SUBSETS = [("key accounting", "abl_x1_auc"),
            ("neighbour disagreement", "abl_x2_auc"),
            ("quantum layer", "abl_x3_auc"),
@@ -250,7 +245,7 @@ SUBSETS = [("key accounting", "abl_x1_auc"),
 def fig_ablation(df):
     """Which feature detects which attack - the phase 4 gate.
 
-    Scored with the prior OFF.  The prior is a per-node quantity correlated with
+    Scored with the prior OFF. The prior is a per-node quantity correlated with
     exposure by construction, so leaving it in would put a floor under every
     cell and turn a feature table into a prior table.
     """
@@ -375,7 +370,7 @@ def fig_separation(df):
     """Mean smoothed score of compromised vs healthy nodes.
 
     AUC is a ranking statistic and says nothing about where the scores actually
-    sit, which is what a threshold policy acts on.  This is the same data in the
+    sit, which is what a threshold policy acts on. This is the same data in the
     units the policy sees.
     """
     d = cell(df, prior=True)
@@ -413,9 +408,7 @@ def fig_separation(df):
     save(fig, "f04_score_separation.png", "S_bar separation vs the thresholds")
 
 
-# --------------------------------------------------------------------------- #
 # 2. response - cost and benefit
-# --------------------------------------------------------------------------- #
 def _points(d):
     """Every operating point in the central cell, as (label, policy, rows)."""
     out = []
@@ -441,7 +434,7 @@ def fig_grid(df):
     """The two live levers of the graded policy, as a surface.
 
     rho_start sets how much of the network the throttle touches; S_iso sets how
-    readily a node is removed outright.  Both panels are needed: the left one
+    readily a node is removed outright. Both panels are needed: the left one
     alone would recommend the top-left corner, which is also the most expensive
     cell in the right one.
     """
@@ -490,7 +483,7 @@ def fig_targeting(df):
 
     Interpolating the blind-control curve to a policy's own dRR gives the share
     of its damage reduction that any uniform quota of the same cost would also
-    have achieved.  What is left is targeting.  Reporting DRR without this
+    have achieved. What is left is targeting. Reporting DRR without this
     subtraction credits a policy for traffic it merely refused.
     """
     d = cell(df)
@@ -541,7 +534,7 @@ def fig_cost(df):
     """The three cost axes separately, because they are not interchangeable.
 
     Extra rejection is a service-level cost, extra key per demand is an
-    operational one, and path stretch is a latency one.  B2 is cheap on the
+    operational one, and path stretch is a latency one. B2 is cheap on the
     first and ruinous on the second; collapsing them into one score would hide
     exactly the trade-off the paper is about.
     """
@@ -564,14 +557,12 @@ def fig_cost(df):
     save(fig, "f08_cost_axes.png", "dRR / dKPD / PSI per operating point")
 
 
-# --------------------------------------------------------------------------- #
 # 3. robustness
-# --------------------------------------------------------------------------- #
 def fig_quiet(df):
     """The central claim: what happens when the attacker stops being loud.
 
     Spec intensity is the phase 1 default; quiet is the smallest value in the
-    intensity sweep.  B1 and B3 read the same score through the same hysteresis
+    intensity sweep. B1 and B3 read the same score through the same hysteresis
     band, so the only difference between the two panels is threshold versus ramp.
     """
     d = cell(df, spec=False)
@@ -612,7 +603,7 @@ def fig_quiet(df):
     save(fig, "f09_quiet_attacker.png", "spec vs quiet intensity, per policy")
 
 
-# Each entry is a keyword override for ``cell()``.  Passing the value as a pin
+# Each entry is a keyword override for ``cell()``. Passing the value as a pin
 # rather than relaxing the pin and filtering afterwards matters: ``cell`` fixes
 # demand.lam to the modal value of whatever survives the other filters, and lam
 # is re-derived per topology and per key mode to hold offered load constant.
@@ -639,16 +630,16 @@ def fig_ofat(df):
     """One factor moved at a time, with the detector's own AUC beside it.
 
     The ordering of the policies is not the finding; the AUC line is, and what
-    it says is narrower than it first looks.  AUC tracks what either policy
+    it says is narrower than it first looks. AUC tracks what either policy
     achieves (0.91 for B1, 0.90 for B3 over the 28 cells) but not the distance
-    between them (0.14).  The greedy column is the reason: the binary policy is
+    between them (0.14). The greedy column is the reason: the binary policy is
     on the floor in all fourteen of its cells across an AUC range of 0.55 to
-    0.90, because AUC is a ranking and tau is a level.  At the best greedy
+    0.90, because AUC is a ranking and tau is a level. At the best greedy
     reading, 0.899, the compromised nodes still score 0.336 against tau = 0.5.
 
     The AUC comes from separate detector-only runs with the configuration prior
     switched off (config/sweep_ofat_prior_off.yaml), not from the policy runs
-    plotted as bars.  The policy runs keep the prior because the policy consumes
+    plotted as bars. The policy runs keep the prior because the policy consumes
     it, and reading their AUC as a detection result is the confound the
     methodology warns about rather than a measurement.
     """
@@ -676,12 +667,12 @@ def fig_ofat(df):
                  for _, d in cells]
             ax.bar(x + (i - 0.5) * 0.38, v, 0.38, color=col, label=lab)
         ax2 = ax.twinx()
-        # use_prior MUST be off here.  The prior is a susceptibility term built
+        # use_prior MUST be off here. The prior is a susceptibility term built
         # from exposure and key-flow share; when the adversary selects its
         # relays by key-flow share it separates the compromised set on its own,
         # and the "busiest relays" cell reported 0.98 for a detector that reads
-        # 0.90.  It also costs AUC where the selection is random, since there it
-        # is uncorrelated with the truth and only adds variance.  Either way the
+        # 0.90. It also costs AUC where the selection is random, since there it
+        # is uncorrelated with the truth and only adds variance. Either way the
         # number is not the detector's.
         auc = [d[(d["attack.profile"] == prof)
                  & d["policy.type"].isin(("B0", "none"))
@@ -715,7 +706,7 @@ def fig_ofat(df):
 
 def fig_f_curve(df):
     """Every policy against the compromise fraction, which is the one axis an
-    operator does not control.  The two families fail for different reasons and
+    operator does not control. The two families fail for different reasons and
     the crossing point is the useful part.
     """
     d = cell(df, f=None)
@@ -749,7 +740,7 @@ def fig_f_curve(df):
 def fig_kappa(df):
     """The routing-weight lever, measured where it is the only lever acting.
 
-    At S_iso=0.9 no node is isolated, so any movement here is kappa's.  It buys
+    At S_iso=0.9 no node is isolated, so any movement here is kappa's. It buys
     nothing and costs path length, because kappa and rho act on the same node
     and rho - which refuses the demand outright - is far the stronger of the two.
     """
@@ -784,15 +775,13 @@ def fig_kappa(df):
     save(fig, "f12_kappa.png", "the routing lever, measured in isolation")
 
 
-# --------------------------------------------------------------------------- #
 # 4. sensitivity and accounting
-# --------------------------------------------------------------------------- #
 def fig_weights(df):
-    """Phase 8.  Two panels because the weights and the threshold they force are
+    """Phase 8. Two panels because the weights and the threshold they force are
     two different sensitivities and only one of them turns out to matter.
 
     Left: re-weighting a feature that is present moves AUC by almost nothing;
-    removing one destroys exactly the profile that feature detects.  Right: the
+    removing one destroys exactly the profile that feature detects. Right: the
     threshold the weights force moves the false-positive rate by a factor of two
     while leaving the ranking alone, so a weight sweep reported on any
     threshold-dependent quantity would have been measuring theta_0.
@@ -808,7 +797,7 @@ def fig_weights(df):
     if d["w"].nunique() < 5:
         print("  f13 skipped: phase 8 sweep not on disk")
         return
-    # "Re-solved" has to be keyed on the (lam_s, theta_0) PAIR.  Uniform weights
+    # "Re-solved" has to be keyed on the (lam_s, theta_0) PAIR. Uniform weights
     # solve back to lam_s = 11.0, the default, and differ only in theta_0 -
     # keying on lam_s alone silently files the uniform recalibrated point under
     # "fixed" and leaves that row with no comparison at all.
@@ -870,7 +859,7 @@ def fig_damage_floor(df):
     """Where the damage goes, and why DRR is reported on the relay share.
 
     A session whose own endpoint is compromised leaks however it is routed, so
-    that block is set by the traffic matrix rather than by any policy.  Quoting
+    that block is set by the traffic matrix rather than by any policy. Quoting
     a policy against total damage caps it at a number it cannot influence - the
     oracle looks like a 20% improvement instead of a 98% one.
     """
@@ -920,7 +909,7 @@ def fig_stability(df):
 
     An isolation policy that flaps is useless in a real controller whatever its
     DRR, because every flap is a routing rebuild and a burst of rerouted
-    sessions.  The hysteresis band and dwell timer exist for this, and B1 gets
+    sessions. The hysteresis band and dwell timer exist for this, and B1 gets
     both so that the comparison is against a well-implemented binary policy.
     """
     d = cell(df)
@@ -953,14 +942,12 @@ def fig_stability(df):
 
 
 
-# --------------------------------------------------------------------------- #
 # 5. the referee-facing figures
-# --------------------------------------------------------------------------- #
 def fig_minimax(df):
-    """F16.  The central claim, stated as the question it answers.
+    """F16. The central claim, stated as the question it answers.
 
     Every other comparison in the paper fixes the attack intensity, and the
-    person fixing it is the author.  Here the adversary picks, and the figure's
+    person fixing it is the author. Here the adversary picks, and the figure's
     job is to show what that does to a threshold.
     """
     d = cell(df, spec=False)
@@ -1004,19 +991,19 @@ def fig_minimax(df):
 
 
 def fig_family(df):
-    """F17.  Does the lead survive a change of topology?
+    """F17. Does the lead survive a change of topology?
 
     Twelve 50-node members, three at each of four densities, every one
     calibrated on its own - its own lambda at 10 % rejection, its own phi, its
-    own (lam_s, theta_0).  Holding any of those fixed across the family would
+    own (lam_s, theta_0). Holding any of those fixed across the family would
     confound density with load.
 
-    The oracle is not plotted.  It isolates the compromised set and throttles
+    The oracle is not plotted. It isolates the compromised set and throttles
     nothing, so on the tapping adversary it sits below the graded policy, which
     also throttles; drawn as a line on a damage axis that reads as an ordering
-    between methods rather than as the cost difference it is.  Its numbers are
+    between methods rather than as the cost difference it is. Its numbers are
     in the results tables, beside its rejection rate, where they can be read
-    for what they are.  The frame here is 0 and 1, the two levels damage
+    for what they are. The frame here is 0 and 1, the two levels damage
     prevented genuinely cannot pass.
 
     Always-on redundancy is kept for context and leads on the greedy adversary.
@@ -1075,13 +1062,13 @@ def fig_session_len(df):
 
     On the central cell the answer is "never, measurably" - but that cell has
     60-600 s sessions against a 3 h attack window, so almost nothing is in flight
-    when a node is isolated.  Sweeping E[T_s] over two orders of magnitude with
+    when a node is isolated. Sweeping E[T_s] over two orders of magnitude with
     lambda rescaled by its inverse holds the offered load and asks the question
     on the axis that actually decides it.
     """
     # cell() cannot be used here: it pins demand.lam, and lam is rescaled by the
     # inverse of E[T_s] at every point precisely so that this axis is length and
-    # not length-times-load.  Everything else cell() would pin is pinned by hand,
+    # not length-times-load. Everything else cell() would pin is pinned by hand,
     # the attack intensity included - the spec row shares the central cell with
     # the intensity and minimax sweeps, and without that pin the E panel dips by
     # 0.2 at one point for no reason but the averaging.
@@ -1134,7 +1121,7 @@ def fig_session_len(df):
 
 
 def fig_baselines(df):
-    """F19.  Coverage of the threat model, and what each method charges for it.
+    """F19. Coverage of the threat model, and what each method charges for it.
 
     The left panel is per adversary; the right panel collapses it to the two
     numbers an operator has to trade off, so the figure can be read without
@@ -1227,10 +1214,10 @@ def fig_baselines(df):
 
 
 def fig_hybrid(df):
-    """F20.  Protection against key spent, for the two parents and the hybrid.
+    """F20. Protection against key spent, for the two parents and the hybrid.
 
     B2 buys its protection outright and pays for it on every session; B3 pays
-    almost nothing and is blind wherever the detector is.  The hybrid spends per
+    almost nothing and is blind wherever the detector is. The hybrid spends per
     session, so it traces a curve between them rather than sitting at a point,
     and the question the figure answers is whether that curve passes above the
     straight line joining its two parents.
@@ -1299,7 +1286,6 @@ def fig_hybrid(df):
     save(fig, "f20_hybrid.png", "hybrid trade-off and where its key goes")
 
 
-# --------------------------------------------------------------------------- #
 def main() -> int:
     os.makedirs(OUT, exist_ok=True)
     df = pd.read_parquet(SRC)

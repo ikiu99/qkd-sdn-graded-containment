@@ -1,7 +1,5 @@
 """Cartesian sweep expansion and parallel, resumable execution.
 
-Phase 2 reference: section 4.10 of phase2-build-spec.
-
 Every worker is independent - no shared state, each run writes its own parquet.
 Never write into one shared output file; aggregate afterwards with
 ``logging_io.read_summaries``.
@@ -11,7 +9,7 @@ Sweep file format::
     base: config/base_t3_otp.yaml
     output_dir: results/raw
     axes:
-      demand.lam:  [0.1, 0.2, 0.3]
+      demand.lam: [0.1, 0.2, 0.3]
       seed_demand: [1, 2, 3, 4, 5]
 """
 from __future__ import annotations

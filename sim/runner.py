@@ -1,13 +1,12 @@
 """Main simulation loop.
 
-Phase 2 reference: section 4.9 of phase2-build-spec.
 Phases 3-4: the loop body below is unchanged in shape - the attack, the noise
 model and the detector all arrive through the factories in ``interfaces``.
 
-Fixed step loop, dt = 1 s.  Three distinct cadences (phase 4, section 4.1):
+Fixed step loop, dt = 1 s. Three distinct cadences (phase 4, section 4.1):
 
     every step               key generation, attack effect, consumption, demand
-    every detector.T_sample  observation noise, feature extraction, score, EWMA
+    every detector.T_sample observation noise, feature extraction, score, EWMA
     every telemetry_period   policy update and the node level event log
 
 Collapsing the last two into one period is what the phase 4 spec explicitly
@@ -67,7 +66,7 @@ def simulate(cfg: SimConfig, *, write: bool = True, asserts: bool = True,
                          cfg.noise.qber_base_max)
     state = init_state(topo)
 
-    # Five independent streams.  Sharing one would mean that changing lambda
+    # Five independent streams. Sharing one would mean that changing lambda
     # moves the compromised node selection, or that changing the attack profile
     # moves the observation noise - a methodological bug that is very hard to
     # find after the fact.
@@ -222,11 +221,10 @@ def simulate(cfg: SimConfig, *, write: bool = True, asserts: bool = True,
                      attack=attack, detector=detector)
 
 
-# --------------------------------------------------------------------------- #
 def load_phi(cfg: SimConfig, out_dir: str = "config") -> np.ndarray | None:
     """Baseline key flow per node, from the phase 2 calibration file.
 
-    Returns None when the file is missing.  The caller reports that as
+    Returns None when the file is missing. The caller reports that as
     ``phi_source='missing'`` in the summary rather than silently substituting
     zeros, because a missing Phi quietly flattens the prior.
     """

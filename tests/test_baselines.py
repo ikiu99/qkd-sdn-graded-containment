@@ -33,15 +33,13 @@ def run(overrides=None):
     return simulate(load_config(BASE, o), write=False, asserts=False).summary
 
 
-# --------------------------------------------------------------------------- #
 # the physical footing
-# --------------------------------------------------------------------------- #
 def test_L0_is_the_value_the_fibre_attenuation_implies():
     """L_0 is fixed by physics, not chosen.
 
     Secret key rate scales with channel transmittance eta = 10^(-alpha L / 10),
-    so exp(-L / L_0) = 10^(-alpha L / 10) forces L_0 = 10 / (alpha ln 10).  At
-    the standard 1550 nm fibre attenuation of 0.2 dB/km that is 21.71 km.  The
+    so exp(-L / L_0) = 10^(-alpha L / 10) forces L_0 = 10 / (alpha ln 10). At
+    the standard 1550 nm fibre attenuation of 0.2 dB/km that is 21.71 km. The
     phase 1 spec's 50 km would need alpha = 0.087 dB/km, below the Rayleigh
     scattering limit of silica - a fibre that does not exist.
     """
@@ -71,9 +69,9 @@ def test_only_the_ratio_of_key_supply_to_demand_matters():
     """Scale the key supply and the key demand together: nothing dimensionless moves.
 
     This is the answer to "your key rates are far below a current commercial
-    QKD system".  They are, and it cannot matter: every metric this paper
+    QKD system". They are, and it cannot matter: every metric this paper
     reports is either dimensionless (rejection rate, AUC, hop count) or a ratio
-    of two damages (DRR), and all of them are invariant.  Only the extensive
+    of two damages (DRR), and all of them are invariant. Only the extensive
     quantities scale, and they scale exactly.
     """
     o = {"attack.profile": "E", "policy.type": "B3", "policy.S_iso": 0.5}
@@ -89,16 +87,14 @@ def test_only_the_ratio_of_key_supply_to_demand_matters():
         assert got[m] == pytest.approx(base[m] * s, rel=1e-6), f"{m} did not scale"
 
 
-# --------------------------------------------------------------------------- #
 # the literature baselines
-# --------------------------------------------------------------------------- #
 def test_b5_detects_the_liar_and_nothing_else():
     """Luo & Li's trust is built on ONE observable, and it shows.
 
     Their C_e derates a link by the disagreement between its two endpoints'
     reports - which is exactly our x2, the feature that responds to profile L
-    and to nothing else.  So a faithful port must move L and leave P, G and E
-    alone.  That is the whole argument for x1 and x3 stated as a test: the
+    and to nothing else. So a faithful port must move L and leave P, G and E
+    alone. That is the whole argument for x1 and x3 stated as a test: the
     published method is not weak, it is narrow.
     """
     drr = {}
@@ -117,7 +113,7 @@ def test_b6_selects_different_paths_from_b2():
     """B6 differs from B2 in path selection, which is the only thing it changes.
 
     Both relay XOR shares over internally node-disjoint paths - that scheme is
-    Kiktenko et al.'s and B2 should be credited to them.  Theirs picks the set
+    Kiktenko et al.'s and B2 should be credited to them. Theirs picks the set
     whose worst link is shortest of key; ours picks the cheapest by hop count.
     If the two came out identical the baseline would be a relabelled B2.
     """

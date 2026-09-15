@@ -25,7 +25,6 @@ def run(overrides=None, **kw):
     return simulate(make(overrides), write=False, asserts=True, **kw)
 
 
-# --------------------------------------------------------------------------- #
 def test_no_attack_zero_damage():
     res = run({"attack.enabled": False})
     assert res.summary["D_eff"] == 0.0
@@ -39,7 +38,7 @@ def test_passive_profile_changes_nothing():
 
     Stronger than the KS test the spec asks for: with no policy feedback, a
     passive compromise cannot touch the dynamics at all, so the two runs are
-    identical observable for observable.  If this ever fails, profile P has
+    identical observable for observable. If this ever fails, profile P has
     started leaving a trace and the 'undetectable by construction' claim is void.
     """
     off = run({"attack.enabled": False})
@@ -103,14 +102,14 @@ def test_relay_endpoint_split_is_charged_in_both_key_modes(km_mode):
     This is the regression for a bug that produced no error anywhere: the relay
     split was added with the phase 5 policies, after the AES re-key path had
     already been written, and only the OTP continuous-accrual branch was
-    updated.  D_eff stayed exact, the split identity D_eff = relay + endpoint
+    updated. D_eff stayed exact, the split identity D_eff = relay + endpoint
     still held because endpoint is *defined* as the remainder, and every AES run
     silently reported D_eff_relay = 0 - which turns DRR_relay, the metric every
     policy is judged on, into 0/0 for half the experiment matrix.
 
     So the assertion that matters is not the identity; it is that the relay
     share is non-zero and matches an independent recomputation from the session
-    log.  Damage is charged over the exposed span in OTP and at each re-key
+    log. Damage is charged over the exposed span in OTP and at each re-key
     pulse in AES, so the two modes are compared against their own definitions.
     """
     o = {"attack.enabled": True, "attack.profile": "G", "attack.f": 0.2,
@@ -129,7 +128,7 @@ def test_relay_endpoint_split_is_charged_in_both_key_modes(km_mode):
         st.D_eff - st.D_eff_relay, rel=1e-9, abs=1e-6)
 
     # Independent recomputation: every exposed session contributes its own
-    # data_rate x span to exactly one of the two buckets.  OTP charges the
+    # data_rate x span to exactly one of the two buckets. OTP charges the
     # exposed span continuously, so the span is reconstructed from the log the
     # way test_damage_accounting does it - ``exposed_bits`` is only stamped when
     # a session closes and would undercount the ones still open at the horizon.

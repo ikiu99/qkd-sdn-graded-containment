@@ -1,14 +1,12 @@
 """Load calibration and baseline key flow.
 
-Phase 2 reference: section 4.11 of phase2-build-spec.
-
 Two products, both written to config/calibration_{topology}_{km_mode}.yaml so
 that phases 3-5 read them instead of re-deriving them:
 
   lambda   the arrival rate that puts B0 without attack at ~1 / 10 / 30 percent
            rejection (phase 1, section 3: low / medium / saturated load)
   Phi_i    normalised key flow through each node in the baseline, the prior
-           component of phase 1, section 7.  Deliberately not degree centrality.
+           component of phase 1, section 7. Deliberately not degree centrality.
 """
 from __future__ import annotations
 
@@ -127,7 +125,7 @@ def measure_evidence_floor(cfg: SimConfig, phi: np.ndarray,
                            q: float = 0.95) -> np.ndarray:
     """Per feature evidence level of a HEALTHY node, from one clean pilot run.
 
-    The operating point has to be set against this, not against e = 0.  A
+    The operating point has to be set against this, not against e = 0. A
     healthy node does not sit at zero evidence: report noise, the N4 background
     stream and window-straddling sessions put e_k at a floor of roughly 0.1-0.2,
     and calibrating as if it were zero puts every threshold a whole noise floor
@@ -144,9 +142,9 @@ def measure_evidence_floor(cfg: SimConfig, phi: np.ndarray,
     if not res.detector.hist_e:
         return np.zeros(3, dtype=float)
     e = np.stack(res.detector.hist_e)            # (samples, nodes, 3)
-    # Per node time average first, then the upper quantile ACROSS nodes.  The
+    # Per node time average first, then the upper quantile ACROSS nodes. The
     # score is smoothed by an EWMA, so what drives a false positive is a node
-    # that looks bad persistently, not a single unlucky sample.  Taking the
+    # that looks bad persistently, not a single unlucky sample. Taking the
     # quantile over raw samples instead would pick up the 5% tail that the dual
     # baseline produces by construction on every run, and would push the
     # operating point far too high.
@@ -159,12 +157,12 @@ def calibrate_score(cfg: SimConfig, topo, phi: np.ndarray,
                     margin: float = 1.15) -> dict:
     """Solve (lam_s, theta_0) in closed form so the score has a usable range.
 
-    The score is S = sigmoid(lam_s*(sum_k w_k e_k - theta_0) + logit(pi_i)).  The
+    The score is S = sigmoid(lam_s*(sum_k w_k e_k - theta_0) + logit(pi_i)). The
     prior's logit spans ~3 units across nodes while a single saturated feature
     under uniform weights moves the evidence term by only lam_s/3, so with the
     spec's lam_s=6, theta_0=0.35 the prior dominates: a median-prior node with
     one feature fully triggered reaches S=0.43 while a healthy high-prior node
-    with no evidence at all reaches 0.45.  Every policy threshold then fires on
+    with no evidence at all reaches 0.45. Every policy threshold then fires on
     the prior rather than on evidence.
 
     Two operating-point targets pin it down, and which ones are chosen is the
@@ -177,16 +175,16 @@ def calibrate_score(cfg: SimConfig, topo, phi: np.ndarray,
           MEDIAN prior                   -> S > s_hi   (evidence can isolate)
 
     "Quiet" means the measured healthy-node evidence floor ``e_floor``, not
-    zero.  With ``ew_bg = w . e_floor`` and ``ew_hit = w_j + sum_{k!=j} w_k
+    zero. With ``ew_bg = w . e_floor`` and ``ew_hit = w_j + sum_{k!=j} w_k
     e_floor_k`` for the weakest-weighted feature j, (a) gives
     ``lam*(theta_0 - ew_bg) > L_max - logit(s_lo)`` and (b) gives
-    ``lam*(ew_hit - theta_0) > logit(s_hi) - L_med``.  Adding them bounds lam_s
+    ``lam*(ew_hit - theta_0) > logit(s_hi) - L_med``. Adding them bounds lam_s
     from below by the *separation* ``ew_hit - ew_bg``; theta_0 then sits at the
     midpoint of its feasible interval so both targets hold with equal slack.
 
     The prior keeps its role: it still spreads S over roughly [0.05, 0.4] on a
     quiet network, which is exactly what the kappa routing-weight lever
-    consumes, while never on its own reaching an isolation threshold.  That is
+    consumes, while never on its own reaching an isolation threshold. That is
     the paper's claim about residual protection on the undetectable profile P,
     made quantitative.
     """
@@ -200,7 +198,7 @@ def calibrate_score(cfg: SimConfig, topo, phi: np.ndarray,
     w = w / w.sum()
     e_bg = (np.zeros(3) if e_floor is None else np.asarray(e_floor, dtype=float))
     ew_bg = float(w @ e_bg)
-    # Weakest ACTIVE feature: the hardest single-feature attack to catch.  A
+    # Weakest ACTIVE feature: the hardest single-feature attack to catch. A
     # weight of zero means the feature is switched off, not that it is the
     # hardest case - taking argmin over all three would make every ablation
     # subset infeasible.

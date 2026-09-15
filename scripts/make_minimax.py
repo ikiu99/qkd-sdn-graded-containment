@@ -2,13 +2,13 @@
 
     python scripts/make_minimax.py
 
-Why this exists.  The quiet-attacker slice compares the policies at one chosen
-intensity, and the intensity was chosen by the person writing the paper.  That
+Why this exists. The quiet-attacker slice compares the policies at one chosen
+intensity, and the intensity was chosen by the person writing the paper. That
 is exactly the objection a referee should raise: pick the level where the binary
 policy happens to fail and the graded one wins by construction.
 
-The fix is to stop choosing.  The attacker also optimises: for each policy it
-picks the intensity that maximises the damage it gets through.  Comparing
+The fix is to stop choosing. The attacker also optimises: for each policy it
+picks the intensity that maximises the damage it gets through. Comparing
 
     max_gamma  D_eff_relay(policy, gamma)
 
@@ -18,7 +18,7 @@ at this intensity" to "B3 has the better worst case".
 
 Loud is not automatically better for the attacker and quiet is not either, which
 is the whole point: loud gets detected and throttled, quiet gets through but
-steals less.  The maximum sits somewhere in between and its location is
+steals less. The maximum sits somewhere in between and its location is
 policy-dependent - that is the object this sweep measures.
 """
 from __future__ import annotations
@@ -36,9 +36,9 @@ SEEDS = list(range(3, 3 + 20 * 10, 10))
 # Profile E has TWO, and they are not independent: one physical tap raises the
 # QBER of the link it sits on *and* costs it secret key rate, so a configuration
 # with a small ``q`` and the full ``s`` is not a quieter attacker, it is an
-# attacker that is invisible in one observable and loud in the other.  The pairs
+# attacker that is invisible in one observable and loud in the other. The pairs
 # below are the ones config/sweep_intensity.yaml uses, so the two sweeps describe
-# the same adversary.  Leaving ``s`` at the spec while sweeping ``q`` made the E
+# the same adversary. Leaving ``s`` at the spec while sweeping ``q`` made the E
 # row of the first minimax table non-monotone, which is how this was found.
 GRID = {
     "G": [("attack.gamma", g) for g in (0.05, 0.10, 0.30, 0.60, 1.00)],
@@ -48,7 +48,7 @@ GRID = {
            (0.020, 0.17), (0.030, 0.25))],
 }
 
-# B0 twice: attacked (the DRR denominator) and clean (the PSI reference).  Both
+# B0 twice: attacked (the DRR denominator) and clean (the PSI reference). Both
 # are needed at every intensity or the baseline join silently drops the cell.
 POLICIES = [
     {"policy.type": "B0", "attack.enabled": True},

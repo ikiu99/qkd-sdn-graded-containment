@@ -1,7 +1,5 @@
 """Parquet output.
 
-Phase 2 reference: section 4.8 of phase2-build-spec.
-
 Two tables per run:
   summary  - one row: every (flattened) config field plus every metric, the
              damage accounting of phase 3 and the detector report of phase 4
@@ -11,7 +9,7 @@ Two tables per run:
              ground truth columns the offline evaluator needs
 
 The ground truth columns (compromised, t_compromise) exist for the *evaluator*,
-which is allowed to know the answer.  The detector is not: see telemetry.py.
+which is allowed to know the answer. The detector is not: see telemetry.py.
 
 Files are written with a fixed schema and column order so that two runs with the
 same seed produce byte identical parquet files.
@@ -46,7 +44,7 @@ EVENT_SCHEMA = pa.schema(
 
 
 def summary_row(cfg: SimConfig, metrics_summary: dict) -> dict:
-    # The two baseline join keys of phase 6.  DRR compares a policy run to the B0
+    # The two baseline join keys of phase 6. DRR compares a policy run to the B0
     # run of the same scenario, PSI to the B0-without-attack run of the same base
     # scenario; carrying them as single columns keeps those joins exact and
     # stable when the config schema grows.

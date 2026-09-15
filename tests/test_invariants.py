@@ -1,4 +1,4 @@
-"""Section 6 of phase2-build-spec: the four runtime invariants."""
+"""The four runtime invariants."""
 from __future__ import annotations
 
 import numpy as np

@@ -1,11 +1,9 @@
 """Detector evaluation, independent of any policy.
 
-Phase 4 reference: section 4.5 of phase3-4-build-spec.
-
 Everything here is a pure function over arrays, so the same code serves two
 callers: the runner, which evaluates at full T_sample resolution while the run
 is still in memory, and the CLI at the bottom, which works offline from
-``{run_id}_events.parquet``.  The event log is sampled at ``telemetry_period``
+``{run_id}_events.parquet``. The event log is sampled at ``telemetry_period``
 (300 s) rather than ``T_sample`` (30 s), so the offline numbers are the coarse
 view of the same thing - the summary row carries the authoritative ones.
 
@@ -14,8 +12,8 @@ Ground truth label per (node, sample):
     label[i, t] = 1 if compromised[i] and t >= t_compromise[i] else 0
 
 Profile E labelling, stated explicitly because it is a choice: the *compromised
-node* is the positive, not both ends of the tapped link.  The system scores
-nodes and the policy levers act on nodes.  The healthy far end is labelled
+node* is the positive, not both ends of the tapped link. The system scores
+nodes and the policy levers act on nodes. The healthy far end is labelled
 negative, so if the detector lights it up that is a genuine false positive and
 it should show up in the results as one.
 """
@@ -31,9 +29,7 @@ INF = float("inf")
 DEFAULT_TAUS = (0.5, 0.7, 0.9)
 
 
-# --------------------------------------------------------------------------- #
 # core statistics
-# --------------------------------------------------------------------------- #
 def roc_auc(scores: np.ndarray, labels: np.ndarray) -> float:
     """Mann-Whitney U statistic, with proper average ranks for ties.
 
@@ -88,7 +84,7 @@ def detection_delay(t: np.ndarray, s_bar: np.ndarray, compromised: np.ndarray,
 
     A node that never crosses is recorded as **censored**, never as infinity and
     never silently dropped: replacing it with infinity destroys the mean and
-    dropping it inflates the apparent speed.  The reportable pair is
+    dropping it inflates the apparent speed. The reportable pair is
     'median delay among the detected' plus 'detection rate'.
     """
     t = np.asarray(t, dtype=float)
@@ -136,9 +132,7 @@ def false_positives(t: np.ndarray, s_bar: np.ndarray, compromised: np.ndarray,
     }
 
 
-# --------------------------------------------------------------------------- #
 # the whole report
-# --------------------------------------------------------------------------- #
 def evaluate(t: np.ndarray, s_bar: np.ndarray, compromised: np.ndarray,
              t_compromise: np.ndarray, taus=DEFAULT_TAUS,
              with_curve: bool = False) -> dict:
@@ -201,15 +195,13 @@ def ablation_table(detector, state, taus=DEFAULT_TAUS) -> dict[str, dict]:
             for k, sub in enumerate(detector.subsets)}
 
 
-# --------------------------------------------------------------------------- #
 # offline CLI over events.parquet
-# --------------------------------------------------------------------------- #
 def from_events(path: str, score_column: str = "S_bar",
                 taus=DEFAULT_TAUS, with_curve: bool = False) -> dict:
     """Reconstruct the score matrix from an events table and evaluate it.
 
     The event log is sampled at ``telemetry_period``, coarser than the detector's
-    own ``T_sample``, so detection delay is quantised to that period.  Use the
+    own ``T_sample``, so detection delay is quantised to that period. Use the
     summary row for the authoritative figures.
     """
     import pyarrow.parquet as pq

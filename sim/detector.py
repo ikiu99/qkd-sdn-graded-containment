@@ -1,7 +1,5 @@
 """Posterior risk estimate S_i(t).
 
-Phase 4 reference: sections 4.1, 4.3 and 4.4 of phase3-4-build-spec.
-
 S is not a detector output, it is a posterior risk estimate: evidence from three
 orthogonal channels, mapped onto a common scale, combined with a configuration
 prior, and smoothed.
@@ -20,7 +18,7 @@ The detector reads the state through :mod:`telemetry` only, and that module may
 not touch a single ``*_true`` field.
 
 Ablation: all seven feature subsets are scored from the *same* evidence matrix
-in the same pass.  Under NullPolicy nothing the detector produces feeds back
+in the same pass. Under NullPolicy nothing the detector produces feeds back
 into the simulation, so the seven variants are exact - not an approximation of
 seven separate runs, but identical to them.
 """
@@ -36,7 +34,7 @@ from .topology import Topology
 
 EPS = 1e-9
 MAD_SCALE = 1.4826
-# Relative floor on the MAD.  A feature that is constant across the whole base
+# Relative floor on the MAD. A feature that is constant across the whole base
 # window has MAD = 0 and would send z to infinity; eps = 1e-9 is not enough,
 # the floor has to scale with the median (section 4.3, "numerical traps").
 MAD_FLOOR_REL = 0.01
@@ -72,7 +70,7 @@ def build_prior(topo: Topology, cfg: DetectorConfig,
     Bias warning that belongs in the analysis: under
     ``attack.selection='top_keyflow'`` the compromised nodes are by construction
     the high-Phi ones, so the prior guesses them right for free and the AUC is
-    inflated.  Always report random and top_keyflow separately, never averaged.
+    inflated. Always report random and top_keyflow separately, never averaged.
     """
     n = topo.n_nodes
     exposure = np.asarray(topo.exposure, dtype=float)
@@ -123,7 +121,6 @@ class SuspicionDetector(Detector):
         self.keep_evidence = bool(getattr(cfg, "keep_evidence", False))
         self.hist_e: list[np.ndarray] = []
 
-    # ------------------------------------------------------------------ #
     def _subset_weights(self, subset: tuple[str, ...]) -> np.ndarray:
         """Renormalise the configured weights onto the active subset.
 
@@ -145,7 +142,6 @@ class SuspicionDetector(Detector):
     def warm(self) -> bool:
         return self._filled >= self.n_base
 
-    # ------------------------------------------------------------------ #
     def update(self, state: NetworkState, topo: Topology, t: float) -> np.ndarray:
         x = self.collector.collect(state, topo, t)
         self.x = x
@@ -178,7 +174,6 @@ class SuspicionDetector(Detector):
             self.hist_e.append(self.e.copy())
         return self.S
 
-    # ------------------------------------------------------------------ #
     def _evidence(self, x: np.ndarray) -> np.ndarray:
         """Dual baseline robust standardisation, then the map onto [0,1]."""
         # temporal: against the node's own history
@@ -207,7 +202,6 @@ class SuspicionDetector(Detector):
             logit = logit + self._prior_logit
         return sigmoid(logit)
 
-    # ------------------------------------------------------------------ #
     def score_history(self) -> tuple[np.ndarray, np.ndarray]:
         """(t of shape (T,), S_bar of shape (T, n_subsets, |V|))."""
         if not self.hist_t:

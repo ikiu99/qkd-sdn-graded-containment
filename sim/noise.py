@@ -1,12 +1,10 @@
 """Observation noise model.
 
-Phase 3 reference: section 3.3 of phase3-4-build-spec.
-
 > In a noiseless simulator every detector is perfect.
 
 With a perfect observer K_obs == K_exp holds exactly for every healthy node, the
 residual is identically zero, any threshold scores AUC = 1.0 and the whole of
-phase 4 is vacuous.  This module is therefore a first class component, not a
+phase 4 is vacuous. This module is therefore a first class component, not a
 refinement.
 
 Four independent sources:
@@ -14,10 +12,10 @@ Four independent sources:
   N1  relative QBER measurement noise            sigma_qber_rel
   N2  key rate jitter                            sigma_skr_rel
   N3  buffer report noise, per edge *side*       sigma_report_rel
-  N4  key consumption invisible to the controller  unmanaged_fraction
+  N4  key consumption invisible to the controller unmanaged_fraction
 
-N1-N3 live here.  N4 is a traffic stream, so it lives in the demand path: see
-``runner`` and ``SessionManager`` with ``managed=False``.  N4 is the only source
+N1-N3 live here. N4 is a traffic stream, so it lives in the demand path: see
+``runner`` and ``SessionManager`` with ``managed=False``. N4 is the only source
 that produces a non zero x1 residual for a *healthy* node - remove it and F1
 scores AUC = 1.0 against profile G, which is exactly the failure the spec warns
 about.
@@ -28,7 +26,7 @@ needs no code but should be named as an independent source in the analysis.
 All four scale together through ``noise.scale``, which is the noise sweep axis.
 
 Stream isolation: the observation noise draws from its own generator, seeded
-from ``seed_noise``.  If it shared the attack stream, changing the attack
+from ``seed_noise``. If it shared the attack stream, changing the attack
 profile would move the noise realisation and profile-to-profile comparisons
 would be contaminated; if it shared the demand stream, changing lambda would.
 """
@@ -55,7 +53,6 @@ class ObservationModel:
         self.sigma_skr = float(cfg.sigma_skr_rel * cfg.scale)
         self.sigma_report = float(cfg.sigma_report_rel * cfg.scale)
 
-    # ------------------------------------------------------------------ #
     def observe(self, state: NetworkState, t: float) -> None:
         """Refresh every ``*_obs`` field from the true state.
 
@@ -91,7 +88,6 @@ class ObservationModel:
             rep = np.repeat(state.buffers[:, None], 2, axis=1)
         state.buffer_reported = rep
 
-    # ------------------------------------------------------------------ #
     def report_noise(self, size) -> np.ndarray:
         """Multiplicative report noise factor, for an attacker that overwrites a
         report and still has to look like a noisy measurement."""

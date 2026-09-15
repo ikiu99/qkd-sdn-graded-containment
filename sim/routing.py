@@ -1,19 +1,18 @@
 """Path table with periodic rebuild.
 
-Phase 2 reference: section 4.4 of phase2-build-spec.
 Phase 5: node-disjoint path sets for policy B2.
 
 Mirrors a real SDN controller: flow rules are pushed periodically, not per
-packet.  Three optimisations matter, and all three are exact - they change how
+packet. Three optimisations matter, and all three are exact - they change how
 fast a path is produced, never which path:
 
 1. ``rebuild`` only runs when the node weights or the isolation mask actually
-   changed *and* ``T_route`` has elapsed.  Under NullPolicy that is exactly once,
+   changed *and* ``T_route`` has elapsed. Under NullPolicy that is exactly once,
    at t=0; under the graded policy B3 the weights drift continuously, so without
    the ``T_route`` gate the cache would be dropped at every policy tick.
 2. The table is lazy in the pair: the paths of a pair are computed on first
    request, never all 1225 pairs up front.
-3. The table is also lazy in K.  Admission walks the candidates in cost order
+3. The table is also lazy in K. Admission walks the candidates in cost order
    and usually stops at the first, but ``shortest_simple_paths`` is a generator
    and materialising all K costs 17x (T1) to 32x (T3) more than one Dijkstra.
    The generator is kept alive and advanced only when a caller asks for the
@@ -21,7 +20,7 @@ fast a path is produced, never which path:
 
 Determinism note: ``shortest_simple_paths`` breaks equal-cost ties by graph
 insertion order, so the pruned graph is always derived from ``topo.G`` in the
-same order.  Changing how it is constructed can silently change which of two
+same order. Changing how it is constructed can silently change which of two
 equal-cost paths is returned.
 """
 from __future__ import annotations
@@ -92,7 +91,6 @@ class RouteTable:
         self._built = False
         self._last_rebuild_t = -INF
 
-    # ------------------------------------------------------------------ #
     def is_stale(self, node_weight: np.ndarray, isolated: np.ndarray,
                  t: float | None = None,
                  edge_cost: np.ndarray | None = None) -> bool:
@@ -121,9 +119,9 @@ class RouteTable:
                 edge_cost: np.ndarray | None = None) -> None:
         """Re-weight the routing graph and drop the path cache.
 
-        Edge cost of (u,v) is 0.5*(node_weight[u] + node_weight[v]).  The
+        Edge cost of (u,v) is 0.5*(node_weight[u] + node_weight[v]). The
         isolation-pruned graph is built once here rather than copied per
-        uncached query.  Bumps ``version``.
+        uncached query. Bumps ``version``.
         """
         self._node_weight = np.array(node_weight, dtype=float, copy=True)
         self._isolated = np.array(isolated, dtype=bool, copy=True)
@@ -154,13 +152,12 @@ class RouteTable:
         if t is not None:
             self._last_rebuild_t = float(t)
 
-    # ------------------------------------------------------------------ #
     def _graph_for(self, src: int, dst: int) -> nx.Graph:
         """Routing graph with isolated nodes removed.
 
         The endpoints of the requested pair are always kept, so a demand that
         originates or terminates at an isolated node can still be evaluated -
-        isolation means "no longer a relay", not "off the network".  The
+        isolation means "no longer a relay", not "off the network". The
         admission test separately rejects paths whose *intermediate* nodes are
         isolated.
         """
@@ -218,7 +215,6 @@ class RouteTable:
         """Is there any path at all? Costs one Dijkstra, not a full Yen."""
         return self.candidate(src, dst, 0) is not None
 
-    # ------------------------------------------------------------------ #
     def disjoint_paths(self, src: int, dst: int,
                        m: int | None = None) -> list[tuple[int, ...]]:
         """Minimum-cost set of m internally **node-disjoint** paths, or [].
@@ -301,7 +297,6 @@ class RouteTable:
         out.sort(key=self.path_cost)
         return out
 
-    # ------------------------------------------------------------------ #
     def path_cost(self, path: tuple[int, ...]) -> float:
         return sum(0.5 * (self._node_weight[u] + self._node_weight[v])
                    for u, v in zip(path[:-1], path[1:]))

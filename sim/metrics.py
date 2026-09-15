@@ -1,8 +1,5 @@
 """Metric accumulators and node level telemetry sampling.
 
-Phase 2 reference: section 4.7 of phase2-build-spec.
-Phase 3 reference: section 3.6 of phase3-4-build-spec.
-
 Absolute rule: no event with t < warmup enters a metric, while the simulation
 itself runs normally through the warm-up window so that buffers and the session
 population reach steady state first.
@@ -75,7 +72,6 @@ class MetricsAccumulator:
         self.keep_session_log = bool(keep_session_log)
         self.session_log: list[Session] = []
 
-    # ------------------------------------------------------------------ #
     def active(self, t: float) -> bool:
         return t >= self.warmup
 
@@ -86,21 +82,20 @@ class MetricsAccumulator:
 
     def note_consumed(self, bits: float, managed_bits: float, t: float) -> None:
         """``bits`` is everything that left the buffers, ``managed_bits`` only the
-        part the controller authorised.  The difference is the N4 background
+        part the controller authorised. The difference is the N4 background
         stream plus whatever a greedy attacker siphoned off."""
         self.key_consumed_all += bits
         if t >= self.warmup:
             self.key_consumed += bits
             self.key_consumed_managed += managed_bits
 
-    # ------------------------------------------------------------------ #
     def on_admit(self, session: Session, t: float) -> None:
         if t < self.warmup:
             return
         self.n_admitted += 1
-        # Three quantities, not one.  mean_path_len (total union hops) is the
+        # Three quantities, not one. mean_path_len (total union hops) is the
         # key-cost axis; mean_leg_len = sum_leg_hops / sum_legs is path STRETCH
-        # and is what PSI measures.  Folding the m-fold replication into stretch
+        # and is what PSI measures. Folding the m-fold replication into stretch
         # would correlate the two Pareto axes and make the frontier misleading.
         self.sum_path_hops += session.hops
         self.sum_leg_hops += session.hops
@@ -118,7 +113,7 @@ class MetricsAccumulator:
         if reason == "unreachable":
             self.n_unreachable += 1
         elif reason == "no_disjoint":
-            # structural: the graph cannot supply m node-disjoint legs.  Kept
+            # structural: the graph cannot supply m node-disjoint legs. Kept
             # apart from a key shortage, or B2's rejection rate would read as a
             # capacity problem when it is a topology one.
             self.n_no_disjoint += 1
@@ -170,7 +165,6 @@ class MetricsAccumulator:
         self.sum_buffer += float(state.buffers.sum())
         self.sum_active += len(state.sessions)
 
-    # ------------------------------------------------------------------ #
     def log_telemetry(self, state: NetworkState, t: float, detector=None) -> None:
         """Sample node level telemetry.
 
@@ -221,7 +215,6 @@ class MetricsAccumulator:
     def telemetry_table(self) -> dict[str, list]:
         return self._tel
 
-    # ------------------------------------------------------------------ #
     def node_key_flow(self, state: NetworkState) -> np.ndarray:
         """Total key relayed through each node after warm-up, bits.
 
@@ -235,7 +228,6 @@ class MetricsAccumulator:
         return np.array([delta[self.topo.node_edges[i]].sum()
                          for i in range(self.topo.n_nodes)], dtype=float)
 
-    # ------------------------------------------------------------------ #
     def summary(self, state: NetworkState | None = None) -> dict:
         offered = self.n_admitted + self.n_rejected
         n_e = self.topo.n_edges if self.topo is not None else 1

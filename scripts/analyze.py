@@ -3,11 +3,11 @@
     python scripts/analyze.py --pareto --drr --psi --cost
 
 All three of DRR, PSI and C are *cross-run* quantities: each needs a baseline
-run to divide by.  Two joins do that, each on a single hash column written into
+run to divide by. Two joins do that, each on a single hash column written into
 every summary row by ``config.scenario_id`` / ``config.base_scenario_id``:
 
     DRR  scenario_id       everything except policy.*   -> the matched B0 run
-    PSI  base_scenario_id  also except attack.*         -> matched B0, no attack
+    PSI  base_scenario_id also except attack.*         -> matched B0, no attack
 
 Joining on "every column except policy.*" instead would be silently fragile:
 adding one config field later changes the key set and invalidates every
@@ -17,8 +17,8 @@ Two things the numbers need stating with:
 
 * **DRR is reported on relay exposure.**  A session whose own endpoint is
   compromised leaks however it is routed, so that share of D_eff is a floor set
-  by the traffic matrix rather than by the policy.  Mixing it in caps DRR at a
-  value no policy can influence.  ``drr_total`` is reported alongside for
+  by the traffic matrix rather than by the policy. Mixing it in caps DRR at a
+  value no policy can influence. ``drr_total`` is reported alongside for
   completeness.
 * **Ratios are paired, then averaged.**  Each seed contributes its own
   DRR = 1 - D_policy/D_B0 and the mean is taken over those, with a bootstrap CI.
@@ -49,7 +49,6 @@ def load(pattern: str) -> pd.DataFrame:
     return df
 
 
-# --------------------------------------------------------------------------- #
 def attach_baselines(df: pd.DataFrame) -> pd.DataFrame:
     """Add the matched B0 and B0-no-attack columns, then DRR and PSI."""
     df = df.copy()
@@ -70,7 +69,7 @@ def attach_baselines(df: pd.DataFrame) -> pd.DataFrame:
     col = "mean_leg_len" if "mean_leg_len" in cref.columns else "mean_path_len"
     df["leg_len_clean"] = df["base_scenario_id"].map(cref[col])
 
-    # DRR - guarded.  A zero denominator happens whenever the attack is off, f=0,
+    # DRR - guarded. A zero denominator happens whenever the attack is off, f=0,
     # or every compromised node turned out never to relay; NaN there is honest,
     # a silent 0/0 dropped by a plotting library is not.
     for name, num, den in (("drr_relay", "D_eff_relay", "D_eff_relay_b0"),
@@ -78,7 +77,7 @@ def attach_baselines(df: pd.DataFrame) -> pd.DataFrame:
         ok = df[den].to_numpy(dtype=float) > 0
         df[name] = np.where(ok, 1.0 - df[num] / df[den].replace(0, np.nan), np.nan)
 
-    # PSI - relative stretch of ONE leg.  The m-fold replication of B2 is a key
+    # PSI - relative stretch of ONE leg. The m-fold replication of B2 is a key
     # cost and already shows up in KPD and RR; folding it in here as well would
     # correlate the two Pareto axes.
     ref_len = df["leg_len_clean"].to_numpy(dtype=float)
@@ -104,7 +103,7 @@ def composite(df: pd.DataFrame, a=(1 / 3, 1 / 3, 1 / 3)) -> pd.Series:
     """C = a1*dRR + a2*dKPD + a3*PSI, on comparable scales.
 
     All three are already relative to the matched baseline, so they share units
-    of "fractional degradation" and the weights mean something.  C is secondary
+    of "fractional degradation" and the weights mean something. C is secondary
     to the Pareto frontier: it collapses three axes onto one with a choice of a
     that nobody can justify, which is exactly why ``--cost`` also reports how
     much the ranking moves as a varies over the simplex.
@@ -114,7 +113,6 @@ def composite(df: pd.DataFrame, a=(1 / 3, 1 / 3, 1 / 3)) -> pd.Series:
             + a[2] * df["PSI"].fillna(0.0))
 
 
-# --------------------------------------------------------------------------- #
 def current(df: pd.DataFrame) -> pd.DataFrame:
     """Drop superseded feature variants before reporting.
 
@@ -187,21 +185,21 @@ def report_pareto(df: pd.DataFrame) -> None:
     tab["frontier"] = front
     print(tab.to_string(index=False, float_format=lambda x: f"{x:.3f}"))
     print("\n  'frontier' marks the non-dominated operating points: the set an\n"
-          "  operator can actually choose between.  Everything else is strictly\n"
+          "  operator can actually choose between. Everything else is strictly\n"
           "  worse on both axes.")
 
 
 def report_frontier_grid(df: pd.DataFrame) -> None:
     """The headline figure: DRR against cost over the S_iso x rho_start grid.
 
-    Not S_iso x kappa.  The lever ablation found kappa inert even at S_iso = 0.9,
+    Not S_iso x kappa. The lever ablation found kappa inert even at S_iso = 0.9,
     where no node is isolated at all and kappa is therefore the only lever left -
     it moves path length by 15% and damage by nothing, because it penalises the
     same node rho already throttles and rho is the stronger instrument.
     """
     # The family sweep anchors every member's throttle to that member's own quiet
     # score and the session sweep varies T_s, so a dozen extra rho_start values
-    # and four session lengths live in the frame.  None of them is a point of
+    # and four session lengths live in the frame. None of them is a point of
     # this grid - they are different networks and different traffic - and pooling
     # them turns a 4x4 surface into a list.
     b3 = one_intensity(df)
@@ -233,7 +231,7 @@ def one_intensity(df: pd.DataFrame) -> pd.DataFrame:
     """Keep a single attack-intensity setting.
 
     The sweep deliberately contains two: the phase 1 defaults and a much quieter
-    attacker.  Pooling them would average a trivially detectable profile with a
+    attacker. Pooling them would average a trivially detectable profile with a
     barely detectable one and report the mean of two different experiments.
     """
     cols = [c for c in ("attack.gamma", "attack.delta", "attack.q")
@@ -251,9 +249,9 @@ def report_targeting(df: pd.DataFrame) -> None:
     """DRR minus the blind control at a matched rejection rate.
 
     Any throttling policy reduces damage two ways: by targeting, and by simply
-    admitting fewer sessions.  BT applies a uniform quota with no detection at
+    admitting fewer sessions. BT applies a uniform quota with no detection at
     all, so interpolating its curve to a policy's own dRR gives the share that is
-    pure volume; what is left is the targeting benefit.  Reporting DRR without
+    pure volume; what is left is the targeting benefit. Reporting DRR without
     this subtraction credits a policy for traffic it merely refused.
     """
     bt = df[(df["policy.type"] == "BT") & df["drr_relay"].notna()]
@@ -263,7 +261,7 @@ def report_targeting(df: pd.DataFrame) -> None:
     curve = bt.groupby("policy.rho_blind")[["dRR", "drr_relay"]].mean()
     curve = curve.sort_values("dRR")
     # anchor at the origin: with no extra rejection a blind quota removes no
-    # damage, exactly.  Without it np.interp clamps to the cheapest measured
+    # damage, exactly. Without it np.interp clamps to the cheapest measured
     # control point and understates the targeting benefit of every cheap policy.
     x = np.concatenate(([0.0], curve["dRR"].to_numpy()))
     y = np.concatenate(([0.0], curve["drr_relay"].to_numpy()))
@@ -330,7 +328,7 @@ def report_ofat(df: pd.DataFrame) -> None:
     """One factor at a time around the central cell, per profile.
 
     The question this answers is not "which cell is best" - it is whether the
-    ordering of the policies survives moving each dimension on its own.  A
+    ordering of the policies survives moving each dimension on its own. A
     conclusion that only holds at one topology, one key-management mode and one
     compromise fraction is not a conclusion about QKD networks.
     """
@@ -363,7 +361,7 @@ def report_ofat(df: pd.DataFrame) -> None:
     # Block A shares the centre cell with this sweep and carries B3 at four
     # rho_start anchors and B2 at m in {2,3}; pooling those into the CENTRE row
     # would compare an averaged operating point against a single one everywhere
-    # else, which is not an OFAT contrast.  Pin each policy to the operating
+    # else, which is not an OFAT contrast. Pin each policy to the operating
     # point the OFAT variants actually use.
     keep = ~d["policy.type"].isin(("B1", "B2", "B3"))
     if "policy.tau" in d.columns:
@@ -412,8 +410,8 @@ def report_weights(df: pd.DataFrame) -> None:
     """Phase 8: how much of the weight sensitivity is really threshold movement.
 
     ``theta_0`` is calibrated against the largest evidence a single-feature
-    attack can produce, which is ``w_k``, not 1/3.  Re-weighting therefore moves
-    the operating point even when the features themselves are unchanged.  Each
+    attack can produce, which is ``w_k``, not 1/3. Re-weighting therefore moves
+    the operating point even when the features themselves are unchanged. Each
     weight point appears twice - re-solved and at the phase 1 default - and the
     gap between the two AUC columns is the part of any "weight sensitivity" that
     is an artefact of holding the threshold fixed.
@@ -423,7 +421,7 @@ def report_weights(df: pd.DataFrame) -> None:
     # The uniform point is the *default* weighting, so without these filters it
     # pools every policy run in results/raw and stops being the phase 8 cell at
     # all - it came out at L = 0.915 against 1.000 for every other point, which
-    # is the pooling, not the weights.  Phase 8 runs with no policy, no prior
+    # is the pooling, not the weights. Phase 8 runs with no policy, no prior
     # and the ablation scorer, which is also exactly the ablation sweep's cell,
     # so the uniform point and that sweep legitimately share rows.
     d = df[df["detector.weights"].notna() & df["auc"].notna()].copy()
@@ -470,7 +468,7 @@ def report_weights(df: pd.DataFrame) -> None:
         print(f"    {str(w):>18}{lam_s}{line}")
     print("    AUC ranks nodes by score, so it is invariant to any monotone")
     print("    rescaling: the recal/fixed columns differ only where a feature is")
-    print("    dropped and the ranking itself changes.  The policy-facing effect")
+    print("    dropped and the ranking itself changes. The policy-facing effect")
     print("    of the threshold is in the FPR column below, not here.")
     print(f"\n    {'weights':>18}{'FPR@0.5 recal':>16}{'FPR@0.5 fixed':>16}")
     for w, blk in sorted(d.groupby("w"), key=lambda kv: -kv[0][0]):
@@ -488,7 +486,7 @@ def report_minimax(df: pd.DataFrame) -> None:
 
     Comparing policies at one intensity lets whoever writes the paper choose the
     operating point, and the choice decides the answer: loud attacks favour the
-    binary policy, quiet ones favour the graded one.  Here the attacker chooses
+    binary policy, quiet ones favour the graded one. Here the attacker chooses
     instead, taking the intensity that maximises the damage it gets through, and
     every policy is reported at its own worst case:
 
@@ -547,7 +545,7 @@ def report_minimax(df: pd.DataFrame) -> None:
             print(f"    {lab:<16}{row}{vals[j]:>9.3f}{lv[j]:>8g}")
         print()
     print("    A policy whose row is flat has no worst case to find - B2 and B4")
-    print("    never read the detector, so intensity cannot move them.  The two")
+    print("    never read the detector, so intensity cannot move them. The two")
     print("    that do read it are the only ones the attacker can play against,")
     print("    and the WORST column is the honest comparison between them.")
 
@@ -558,7 +556,7 @@ def report_prior_confound(df: pd.DataFrame) -> None:
     The prior is a function of exposure, and under ``selection=top_keyflow`` the
     attacker picks nodes by exposure too - so the prior correlates with the
     ground truth by construction and inflates AUC without any feature firing.
-    Reporting one column would be a choice about how much of that to keep.  Both
+    Reporting one column would be a choice about how much of that to keep. Both
     columns is the only honest presentation, and the gap between them is itself
     the measurement of how much the prior is worth.
     """
@@ -588,7 +586,7 @@ def report_prior_confound(df: pd.DataFrame) -> None:
             print(f"    {seln:<14}{prof:<9}{off:>15.3f}{on:>14.3f}"
                   f"{on - off:>+11.3f}")
     print("    Under random selection the prior is uncorrelated with the")
-    print("    compromised set and the inflation is noise.  Under top_keyflow it")
+    print("    compromised set and the inflation is noise. Under top_keyflow it")
     print("    is the whole signal, which is why every detection table in this")
     print("    project is quoted with the prior OFF.")
 
@@ -603,7 +601,7 @@ def report_family(df: pd.DataFrame) -> None:
     against a saturated sparse one and call the difference connectivity.
 
     Every member is biconnected by construction, so by Menger *every* pair has
-    two node-disjoint paths and B2 with m=2 is always feasible.  What density
+    two node-disjoint paths and B2 with m=2 is always feasible. What density
     actually buys is the third path - ``frac_ge_3_disjoint`` runs 0.4 % to 19 %
     across the family - and the cost of the second one, which is what the PSI
     and dKPD columns measure.
@@ -665,12 +663,12 @@ def report_session_len(df: pd.DataFrame) -> None:
     """Does isolating early matter, and when?
 
     Isolation blocks new admissions through a node but lets sessions already
-    routed through it drain.  On the central cell the drain-versus-evict choice
+    routed through it drain. On the central cell the drain-versus-evict choice
     is worth +-0.01 DRR, inside seed noise - but that is a fact about a traffic
     model whose sessions last 60-600 s against a 3 h post-t_c window, not a fact
-    about QKD networks.  Here E[T_s] runs from 82 s to 5400 s with lambda
+    about QKD networks. Here E[T_s] runs from 82 s to 5400 s with lambda
     rescaled by its inverse, so offered load is held and the axis is length
-    alone.  If the two settings separate anywhere it will be at the long end,
+    alone. If the two settings separate anywhere it will be at the long end,
     where the in-flight population at the moment of isolation stops being a
     rounding error.
     """
@@ -743,7 +741,7 @@ def report_baselines(df: pd.DataFrame) -> None:
     """The comparison against published methods, per profile.
 
     B0-B4 and BT are all constructions of this paper, so a table containing only
-    them shows an ablation, not a comparison with the state of the art.  B5, B6
+    them shows an ablation, not a comparison with the state of the art. B5, B6
     and B7 are reimplementations of published methods run on the same cell, the
     same seeds and the same metric; the adaptations each one needed are in the
     class docstrings in sim/policy.py and must be restated in the paper.
@@ -792,7 +790,7 @@ def report_baselines(df: pd.DataFrame) -> None:
         print()
     print("    B5's mechanism is one observable - the disagreement between a")
     print("    link's two endpoint reports, which is our x2 - so it should move")
-    print("    profile L and nothing else.  That it does is the argument for x1")
+    print("    profile L and nothing else. That it does is the argument for x1")
     print("    and x3, made with the published method rather than against it.")
 
 
@@ -827,7 +825,6 @@ def report_cost_sensitivity(df: pd.DataFrame, n: int = 200) -> None:
           "  artefact of the weights; a split means C should not be quoted alone.")
 
 
-# --------------------------------------------------------------------------- #
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--pattern", default="results/raw/*.parquet")

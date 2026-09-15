@@ -2,9 +2,9 @@
 
 Phase 5 policy B2 relays XOR key shares over m node-disjoint paths and rejects a
 demand outright when fewer than m exist, and the partition guard refuses to
-isolate a node whose removal would disconnect the graph.  Both are therefore
+isolate a node whose removal would disconnect the graph. Both are therefore
 bounded by the *graph*, not by the policy: on a topology with articulation
-points those bounds would silently become the result.  Real QKD backbones are
+points those bounds would silently become the result. Real QKD backbones are
 laid out 2-connected precisely so no single trusted relay is a single point of
 failure, so that is asserted here rather than assumed.
 """

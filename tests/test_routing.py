@@ -101,14 +101,12 @@ def test_disjoint_paths_share_no_edge(topo):
         seen |= eids
 
 
-# --------------------------------------------------------------------------- #
 # phase 5: node-disjoint path sets for policy B2
-# --------------------------------------------------------------------------- #
 def test_disjoint_paths_share_no_node(topo):
     """The security claim of B2 rests on this.
 
     B2 relays one XOR key share per leg, so a relay sitting on two legs sees two
-    shares and reconstructs the key.  Edge-disjointness is not enough: two
+    shares and reconstructs the key. Edge-disjointness is not enough: two
     edge-disjoint paths may share an intermediate node.
     """
     rt = RouteTable(topo, K=4, disjoint_K=3)
@@ -134,7 +132,7 @@ def test_disjoint_paths_are_minimum_cost(topo):
     """Exact minimum cost, not greedy over the K Yen paths.
 
     Brute forced against every node-disjoint pair of simple paths, so the test
-    states the property rather than a number that happened to come out.  Greedy
+    states the property rather than a number that happened to come out. Greedy
     filtering of Yen's list can miss the optimum because Yen's paths are minor
     perturbations of each other and tend to share interior nodes.
     """

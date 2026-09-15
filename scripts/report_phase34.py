@@ -5,7 +5,7 @@
     python scripts/report_phase34.py --noise --alpha
 
 The ablation table is the gate of phase 4 section 4.7: each profile must be
-picked up by its own feature and by no other.  If the diagonal is not there,
+picked up by its own feature and by no other. If the diagonal is not there,
 either the attack has no effect or the feature cannot see it, and no policy
 result built on top would mean anything.
 """
@@ -72,12 +72,12 @@ def ablation(df: pd.DataFrame) -> None:
         if selection == "top_keyflow" and prior_on:
             print("  NOTE: top_keyflow + prior. The compromised nodes ARE the high-Phi\n"
                   "  nodes, so the prior identifies them with no evidence at all - which\n"
-                  "  is why even profile P scores high in this block.  It measures the\n"
-                  "  prior, not the features.  Never average it with 'random'.")
+                  "  is why even profile P scores high in this block. It measures the\n"
+                  "  prior, not the features. Never average it with 'random'.")
         elif selection == "random" and prior_on:
             print("  NOTE: random + prior. Here the prior is uncorrelated with the\n"
                   "  compromised set, so it acts as a per node offset that dilutes a\n"
-                  "  weak feature instead of helping.  Read feature quality off the\n"
+                  "  weak feature instead of helping. Read feature quality off the\n"
                   "  use_prior=False block; this one is the end to end operating figure.")
 
 
@@ -102,13 +102,13 @@ def damage(df: pd.DataFrame) -> None:
           "  once per session however many compromised nodes its path crosses.\n"
           "  In KM-OTP the two are equal by construction (one key bit per data bit);\n"
           "  they separate in KM-AES, which is the whole reason D_eff is the primary\n"
-          "  metric.  These numbers are the denominator of DRR in phase 5.")
+          "  metric. These numbers are the denominator of DRR in phase 5.")
 
 
 def operating_point(df: pd.DataFrame) -> None:
     """How close the score actually gets to the policy thresholds.
 
-    Phase 5 acts at S_iso in {0.5, 0.7, 0.9}.  If the score a real attack
+    Phase 5 acts at S_iso in {0.5, 0.7, 0.9}. If the score a real attack
     produces never reaches those, no policy lever ever fires and every phase 5
     comparison collapses to B0.
     """
@@ -123,7 +123,7 @@ def operating_point(df: pd.DataFrame) -> None:
           "  triggers exactly ONE of three features - which is what P/G/L/E are\n"
           "  designed to do - reaches at most S = sigmoid(6*(1/3 - 0.35)) ~ 0.60.\n"
           "  So S_iso = 0.7 and 0.9 are structurally unreachable for a single\n"
-          "  feature attack, and only S_iso = 0.5 can fire.  Decide in phase 5\n"
+          "  feature attack, and only S_iso = 0.5 can fire. Decide in phase 5\n"
           "  whether to lower theta_0, reweight, or keep S_iso at 0.5.")
 
 

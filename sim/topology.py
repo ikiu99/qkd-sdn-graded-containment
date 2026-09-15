@@ -1,7 +1,6 @@
 """Graph loading, stable edge indexing and per-link secure key rate.
 
-Phase 2 reference: section 4.2 of phase2-build-spec.
-Key rate model (phase1 section 1.3):  R_e = R_max * exp(-L_e / L_0)
+Key rate model (phase1 section 1.3): R_e = R_max * exp(-L_e / L_0)
 """
 from __future__ import annotations
 

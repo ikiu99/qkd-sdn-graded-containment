@@ -3,14 +3,14 @@
     python scripts/make_family.py
 
 Three named topologies with one sample each answer "did it work on nsfnet" and
-nothing more.  Connectivity is the single structural property the whole response
+nothing more. Connectivity is the single structural property the whole response
 argument depends on - B2 needs node-disjoint paths to exist, the partition guard
 needs the graph to survive an isolation, and the cost of both is set by how much
 longer the second path is than the first - so it deserves to be an axis rather
 than three anecdotes.
 
 The family spans mean degree 2.2 to 4.4 with three independent samples at each
-point.  Every member is biconnected by construction, exactly as ``net50`` is, so
+point. Every member is biconnected by construction, exactly as ``net50`` is, so
 **every** member has two node-disjoint paths between every pair (Menger) and the
 interesting quantities are the *third* path and the *cost* of the second:
 
@@ -20,7 +20,7 @@ interesting quantities are the *third* path and the *cost* of the second:
 Each member is calibrated on its own, because none of this is comparable
 otherwise:
 
-* ``demand.lam`` is bisected to put B0 at 10 % rejection.  A denser graph carries
+* ``demand.lam`` is bisected to put B0 at 10 % rejection. A denser graph carries
   more traffic at the same lambda, so holding lambda fixed would compare a lightly
   loaded dense network against a saturated sparse one and call the difference
   connectivity.
@@ -126,7 +126,7 @@ def calibrate(name: str, path: str) -> dict:
                          cfg.noise.qber_base_max)
     sc = calibrate_score(cfg, topo, phi, floor)
 
-    # The throttle anchor is a property of the member, not a constant.  A denser
+    # The throttle anchor is a property of the member, not a constant. A denser
     # graph has a different quiet score, and pinning every member to net50's
     # would mean rho_start throttles the whole of a sparse member and none of a
     # dense one - the lever would stop being comparable across the very axis the

@@ -42,7 +42,6 @@ def attacked(profile, **extra):
     return run(o)
 
 
-# --------------------------------------------------------------------------- #
 def test_detector_isolation():
     """The feature extractor may not read a single privileged field.
 
@@ -155,10 +154,10 @@ def test_evidence_is_bounded_and_one_sided():
 def test_no_attack_low_scores():
     """With no attack, scores must stay clear of the policy thresholds.
 
-    The spec words this as "no S_bar crosses 0.5".  Taken literally that demands
+    The spec words this as "no S_bar crosses 0.5". Taken literally that demands
     a detector with a zero false positive rate, which no detector facing real
     measurement noise has - and a simulator that delivered one would be the very
-    failure mode section 0 warns about.  What is asserted instead is the
+    failure mode section 0 warns about. What is asserted instead is the
     operating statement that the policy thresholds of phase 1
     (S_iso in {0.5, 0.7, 0.9}) rely on.
 
@@ -236,7 +235,6 @@ def test_noise_seed_moves_scores_not_demand():
     assert not np.array_equal(sa, sb)
 
 
-# --------------------------------------------------------------------------- #
 # intensities that put each feature near the bottom of the healthy band; see
 # config/sweep_intensity.yaml for the curve these came from
 QUIET_ATTACK = {"G": {"attack.gamma": 0.10},
@@ -248,15 +246,15 @@ def test_auc_not_perfect():
     """Guard that the observation noise is actually present and actually binds.
 
     The spec states this as "AUC must never be 1.0", on the reasoning that a
-    noiseless simulator makes every detector perfect.  Asserting a numeric
+    noiseless simulator makes every detector perfect. Asserting a numeric
     ceiling turns out to test the wrong thing: profile L legitimately reaches
     0.99 even when delta is dropped to the size of the report noise itself,
     because a *systematic* bias is integrated over a 120-sample baseline window
-    while zero-mean noise averages away.  That is a property of the feature, not
+    while zero-mean noise averages away. That is a property of the feature, not
     a missing noise model, and it is worth reporting rather than suppressing.
 
     What is asserted instead is the causal statement the guard was for: removing
-    the noise must make the detector strictly better.  If it does not, the noise
+    the noise must make the detector strictly better. If it does not, the noise
     is not reaching the features.
     """
     for profile in ("G", "L", "E"):
@@ -273,10 +271,10 @@ def test_auc_not_perfect():
             f"({a_noisy:.4f} -> {a_clean:.4f}); is the noise reaching the features?")
 
     # Note on what is deliberately NOT asserted: the false positive rate does not
-    # fall when the noise is removed - it rises.  With no noise a healthy node's
+    # fall when the noise is removed - it rises. With no noise a healthy node's
     # feature is identically zero over the whole baseline window, the MAD
     # collapses onto its relative floor, and the robust z-score explodes on any
-    # residual deviation.  A noiseless detector is unstable rather than perfect,
+    # residual deviation. A noiseless detector is unstable rather than perfect,
     # which is a sharper statement of the same warning and not a usable probe.
 
 
@@ -328,7 +326,6 @@ def test_subsets_cover_the_seven_combinations():
         assert f"abl_{name}_auc" in res.summary
 
 
-# --------------------------------------------------------------------------- #
 def test_roc_auc_matches_brute_force():
     rng = np.random.default_rng(0)
     scores = rng.random(400)
@@ -366,14 +363,14 @@ def test_x1_is_one_sided_only_when_signed(mode, expect_negative):
     ``|K_obs - K_exp|`` is two-sided: a node that consumed LESS than the
     controller authorised - an idle one, or one whose buffer report drifted up -
     comes out exactly as suspicious as one that drained extra key, though only
-    the second is an attack.  Every attack that moves x1 moves it upward, so the
+    the second is an attack. Every attack that moves x1 moves it upward, so the
     sign carries the discrimination and the magnitude carries that plus a
     symmetric noise channel.
 
     Driven directly rather than through a run, because this is a property of the
     formula and a run would only reach it via whatever the traffic happened to
-    do.  Deliberately not a test of AUC: signing x1 does not raise it (0.655 ->
-    0.657 on profile G over 10 seeds).  What it buys is roughly a fifth of the
+    do. Deliberately not a test of AUC: signing x1 does not raise it (0.655 ->
+    0.657 on profile G over 10 seeds). What it buys is roughly a fifth of the
     false-positive rate on every profile, and this is the mechanism.
     """
     from sim.telemetry import TelemetryCollector

@@ -1,7 +1,7 @@
 """Phase 7: analytical model validation.
 
 Cross-validation against QKDNetSim is deferred to future work, so the simulator
-is instead checked against closed forms it must reproduce.  These are deliberately
+is instead checked against closed forms it must reproduce. These are deliberately
 *interaction* tests - each one exercises several components at once against an
 answer derived outside the simulator - rather than more unit tests of parts that
 already have them.
@@ -34,16 +34,14 @@ def run(base, overrides, **kw):
     return simulate(load_config(base, overrides), write=False, **kw)
 
 
-# --------------------------------------------------------------------------- #
 # 1. queueing: the session population is M/G/inf when nothing blocks
-# --------------------------------------------------------------------------- #
 def test_session_population_matches_m_g_infinity():
     """E[active] = (1 + unmanaged_fraction) * lambda * (E[T_s] + dt).
 
-    Both corrections matter and neither is a fudge.  ``mean_active_sessions``
+    Both corrections matter and neither is a fudge. ``mean_active_sessions``
     counts the N4 background stream as well as the managed one, and a session
     admitted at t0 is held in the population for the steps t0 .. t0+T_s
-    inclusive, which is T_s + dt of occupancy.  Requires a regime with no
+    inclusive, which is T_s + dt of occupancy. Requires a regime with no
     rejection and no interruption, so lambda is tiny and B_max is huge.
     """
     lam = 0.02
@@ -72,13 +70,11 @@ def test_offered_load_matches_poisson_rate():
         f"offered {got}, Poisson predicts {expected:.0f}")
 
 
-# --------------------------------------------------------------------------- #
 # 2. fluid limit: throughput is capped by generation, not by anything else
-# --------------------------------------------------------------------------- #
 def test_consumption_cannot_exceed_generation_in_the_long_run():
     """Over a long overloaded run the network cannot consume more key than it
     makes, and with the buffers driven to the floor it must consume nearly all
-    of it.  This is the fluid limit, and it is the one statement the whole
+    of it. This is the fluid limit, and it is the one statement the whole
     buffer model has to satisfy."""
     res = run(T3, {"horizon": 43200, "warmup": 1800, "demand.lam": 5.0})
     s = res.summary
@@ -91,7 +87,7 @@ def test_consumption_cannot_exceed_generation_in_the_long_run():
     # Under uniform src/dst the buffer distribution is sharply bimodal - measured
     # here as 36% of links below a tenth full while the median link sits at
     # 99.9% - so mean_buffer_util is a misleading summary and is deliberately not
-    # what is asserted on.  Worth stating in the paper: raising lambda does not
+    # what is asserted on. Worth stating in the paper: raising lambda does not
     # raise the mean, it deepens the core.
     frac_drained = float((res.state.buffers < 0.1 * res.topo.B_max).mean())
     assert frac_drained > 0.2, (
@@ -111,9 +107,7 @@ def test_key_conservation_closes_exactly(km):
     assert net == pytest.approx(delta, rel=1e-9, abs=1e-3)
 
 
-# --------------------------------------------------------------------------- #
 # 3. routing: the path table reproduces networkx, and admission biases it
-# --------------------------------------------------------------------------- #
 def test_unloaded_path_length_matches_networkx():
     """With unit weights the cached first path is a shortest path, so the mean
     over all pairs must equal nx.average_shortest_path_length exactly."""
@@ -143,13 +137,11 @@ def test_admission_is_biased_towards_short_paths():
         f"topological mean {topological:.2f}")
 
 
-# --------------------------------------------------------------------------- #
 # 4. damage accounting against a closed form
-# --------------------------------------------------------------------------- #
 def test_total_compromise_exposes_every_admitted_session():
     """With f = 1.0 every node is compromised, so every managed session is
     exposed from the moment it is classified and D_eff must equal the closed
-    form over the session log.  This exercises admission, the damage aggregates,
+    form over the session log. This exercises admission, the damage aggregates,
     the t_c reclassification and the close path together."""
     horizon, t_c = 21600, 10800
     res = run("config/attack_t3_otp.yaml",
@@ -182,15 +174,13 @@ def test_no_attack_leaves_no_damage_under_every_policy():
         assert res.summary["exposed_session_ratio"] == 0.0, kind
 
 
-# --------------------------------------------------------------------------- #
 # 5. slow-reference mode: every incremental aggregate against its O(n) twin
-# --------------------------------------------------------------------------- #
 def test_incremental_aggregates_match_full_recomputation():
     """The strongest interaction test available here.
 
     Every O(1) aggregate the simulator maintains - edge_rate, the managed
     variant, and the three exposure sums - is rebuilt from scratch by walking the
-    session set, with attack, detector, policy and multipath all running.  A
+    session set, with attack, detector, policy and multipath all running. A
     drift anywhere in the open/close/starve/reclassify paths shows up here and
     nowhere else.
     """
@@ -213,9 +203,7 @@ def test_incremental_aggregates_match_full_recomputation():
     assert st.exposed_key_rate_relay == pytest.approx(key_r, abs=1e-6)
 
 
-# --------------------------------------------------------------------------- #
 # 6. the key rate model against its own definition
-# --------------------------------------------------------------------------- #
 def test_key_rate_model_and_fill_time():
     """R_e = R_max exp(-L_e/L_0), and an empty buffer fills in B_max/R_e seconds.
 

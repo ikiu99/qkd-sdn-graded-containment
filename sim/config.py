@@ -1,7 +1,5 @@
 """Configuration dataclasses, YAML loading and deterministic run identifiers.
 
-Phase 2 reference: section 4.1 of phase2-build-spec.
-All model defaults come from phase1-model-spec.
 """
 from __future__ import annotations
 
@@ -117,12 +115,12 @@ class DetectorConfig:
     alpha: float = 0.05             # EWMA smoothing
     x1_mode: str = "signed"         # "signed" | "abs" | "cusum", telemetry._x1
     # x1_mode="cusum" only: samples used for the frozen reference, and the
-    # per-sample slack that holds an honest node at zero.  The reference
+    # per-sample slack that holds an honest node at zero. The reference
     # window sits inside the warm-up, i.e. before t_c - an assumption the
     # paper states rather than hides.
     x1_cusum_ref: int = 12
     x1_cusum_k: float = 0.5
-    # Forgetting factor.  1.0 is the textbook unbounded CUSUM, which the
+    # Forgetting factor. 1.0 is the textbook unbounded CUSUM, which the
     # rolling baseline downstream cannot cope with; below 1 the statistic
     # is bounded and stationary under the null while still integrating
     # over about 1/(1-decay) samples.
@@ -132,7 +130,7 @@ class DetectorConfig:
     x2_mode: str = "signed"         # "signed" | "abs" - see telemetry._x2
     b1: float = 0.5                 # x3: QBER term
     b2: float = 0.5                 # x3: SKR term
-    # Operator calibrated constants used to standardise the x1 residual.  These
+    # Operator calibrated constants used to standardise the x1 residual. These
     # are the controller's *assumptions* about its own measurement quality, not
     # the simulator's true noise settings: keeping them separate is what allows
     # a later sweep over "what if the operator's assumption is wrong".
@@ -152,7 +150,7 @@ class DetectorConfig:
 
 @dataclass(frozen=True)
 class PolicyConfig:
-    """Phase 5, section 8.3 of phase1-model-spec and section 10 for the baselines.
+    """Policy configuration: the graded response and the baselines it is measured against.
 
     Five policies share one config so that a sweep can move between them on a
     single axis and every run in a scenario hashes identically outside
@@ -186,10 +184,10 @@ class PolicyConfig:
     # Calibrated on the full horizon at 20 seeds, not guessed, and reported at
     # the baseline's OWN best point rather than at ours: beta = 50 reaches
     # DRR 0.995 on the liar for dRR +0.365, while beta = 200 buys nothing more
-    # on L (0.995) and costs +0.478.  Above 1000 the policy stops detecting and
+    # on L (0.995) and costs +0.478. Above 1000 the policy stops detecting and
     # starts throttling everything - at 5000 it reaches DRR 0.867 on the
     # UNDETECTABLE profile P, which is volume, not detection, and matches the
-    # blind control.  Swept in config/sweep_baselines.yaml.
+    # blind control. Swept in config/sweep_baselines.yaml.
     beta_trust: float = 50.0
     # B7, Bi et al. 2023: weight on remaining key vs link availability,
     # their alpha with beta = 1 - alpha
@@ -197,11 +195,11 @@ class PolicyConfig:
     # How the routing weight turns a risk score into a path cost.
     #   "exp"     w_i = exp(kappa * S_bar_i), the phase 1 formula, measured inert
     #   "logrisk" w_i = 1 + kappa * (-log(1 - S_bar_i))
-    # The second is the one the damage model implies.  Routing cost sums
+    # The second is the one the damage model implies. Routing cost sums
     # 0.5*(w_u + w_v) over the edges of a path, so each interior node
     # contributes w_i exactly once and the path cost becomes
     # hops + kappa * sum(-log(1 - S_bar)) - i.e. hop count plus the cumulative
-    # log-probability that the path contains a compromised relay.  Minimising it
+    # log-probability that the path contains a compromised relay. Minimising it
     # maximises the chance the whole path is clean, which is what exposure
     # actually depends on; exp(kappa*S) merely makes a suspect node a constant
     # factor dearer and is dominated by the quota lever acting on the same node.
@@ -255,9 +253,7 @@ _SECTIONS = {
 }
 
 
-# --------------------------------------------------------------------------- #
 # loading
-# --------------------------------------------------------------------------- #
 def _deep_merge(base: dict, extra: dict) -> dict:
     """Recursive dict merge, extra wins. base is not mutated."""
     out = copy.deepcopy(base)
@@ -456,9 +452,7 @@ def validate(cfg: SimConfig) -> None:
             raise ValueError("no time left after warmup + W_base; raise the horizon")
 
 
-# --------------------------------------------------------------------------- #
 # serialisation / identity
-# --------------------------------------------------------------------------- #
 def to_dict(cfg: SimConfig) -> dict:
     """Plain nested dict of the whole config."""
     return asdict(cfg)
@@ -492,10 +486,10 @@ def _hash_config(cfg: SimConfig, drop: tuple[str, ...]) -> str:
 def scenario_id(cfg: SimConfig) -> str:
     """Identity of everything except the policy - the DRR baseline join key.
 
-    DRR compares a policy run against the B0 run of the *same* scenario.  Joining
+    DRR compares a policy run against the B0 run of the *same* scenario. Joining
     on "every column except policy.*" over a flattened parquet is fragile: adding
     one config field later silently changes the key set and invalidates every
-    previously computed DRR.  One hash column is stable under schema growth and
+    previously computed DRR. One hash column is stable under schema growth and
     is checkable (each scenario_id group must hold exactly one B0 row per seed).
     """
     return _hash_config(cfg, ("policy", "output_dir", "run_id"))
