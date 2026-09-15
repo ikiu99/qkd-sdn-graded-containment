@@ -139,3 +139,11 @@ bound on damage prevented: a policy that also throttles can prevent more damage
 than B4 by admitting less traffic, and ours does on the tapping profile. B4
 bounds what perfect *detection* buys when spent on isolation alone. The only
 real ceiling on the damage reduction ratio is 1.
+
+---
+
+## Licence
+
+Code is under the MIT Licence (`LICENSE`). Data and figures are under
+CC BY 4.0 (`LICENSE-DATA.md`), because they are a research record and their
+reuse should carry attribution.
