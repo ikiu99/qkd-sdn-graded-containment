@@ -117,8 +117,15 @@ def panel_tags(axes, y=1.02):
 
 def cell(df, *, topo="net50", km="OTP", f=0.10, spec=True, prior=None,
          load=True, alpha=0.05, noise=1.0, selection="random", x2="signed",
-         x1="signed", collude=False, teardown=False):
-    """Pin the central cell; pass None to any argument to relax that pin."""
+         x1="signed", collude=False, teardown=False, route="exp",
+         hybrid_agg="product"):
+    """Pin the central cell; pass None to any argument to relax that pin.
+
+    Every categorical mode belongs here. Each one was added by a study that
+    selects on it itself, and each one, left unpinned, turns some unrelated
+    figure's operating point into an average over a variant that study measured
+    and rejected.
+    """
     d = df
     if collude is not None and "attack.collude" in d.columns:
         d = d[d["attack.collude"].astype(bool) == collude]
@@ -127,6 +134,13 @@ def cell(df, *, topo="net50", km="OTP", f=0.10, spec=True, prior=None,
     # The default is to drain rather than evict.
     if teardown is not None and "policy.tear_down_on_isolate" in d.columns:
         d = d[d["policy.tear_down_on_isolate"].astype(bool) == teardown]
+    # logrisk is a measured failure, not an alternative: 0.136 against exp's
+    # 0.317 at kappa = 10. Averaging it in halves every routing number.
+    if route is not None and "policy.route_mode" in d.columns:
+        d = d[d["policy.route_mode"].fillna("exp") == route]
+    # the max and mean path-risk forms belong to the aggregation study alone
+    if hybrid_agg is not None and "policy.hybrid_agg" in d.columns:
+        d = d[d["policy.hybrid_agg"].fillna("product") == hybrid_agg]
     if x2 is not None:
         d = d[d["detector.x2_mode"] == x2]
     if x1 is not None:
@@ -1258,11 +1272,6 @@ def fig_hybrid(df):
     """
     d = cell(df)
     d = d[np.isclose(d["demand.T_s_max"], 600.0)]
-    # The aggregation study swept max and mean over their own trigger grids,
-    # which live on different scales. Pooling the three here would draw the
-    # union of three grids as one curve; the paper's policy is the product form.
-    if "policy.hybrid_agg" in d.columns:
-        d = d[(d["policy.type"] != "B8") | (d["policy.hybrid_agg"] == "product")]
     if not (d["policy.type"] == "B8").any():
         print("  f20 skipped: hybrid sweep not on disk")
         return
