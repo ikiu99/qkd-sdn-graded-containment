@@ -185,7 +185,19 @@ class CompromiseAttack(Attack):
         if not self.armed or self.profile != "L" or self.lie_edges.size == 0:
             return
         e, side = self.lie_edges, self.lie_sides
-        factor = (self.noise.report_noise(e.size) if self.noise is not None
-                  else np.ones(e.size))
+        if self.cfg.collude:
+            # One draw per edge instead of one per reporting end. On a link with
+            # only one compromised end nothing changes. On a link with two, both
+            # ends now report the same number, which is what a coordinating pair
+            # would agree to do, and x2 - a difference between the two reports -
+            # is exactly zero there. This is the worst case for x2 and the
+            # reason it is worth measuring separately.
+            uniq, inv = np.unique(e, return_inverse=True)
+            per_edge = (self.noise.report_noise(uniq.size) if self.noise is not None
+                        else np.ones(uniq.size))
+            factor = per_edge[inv]
+        else:
+            factor = (self.noise.report_noise(e.size) if self.noise is not None
+                      else np.ones(e.size))
         state.buffer_reported[e, side] = (state.buffers[e] * (1.0 + self.cfg.delta)
                                           * factor)

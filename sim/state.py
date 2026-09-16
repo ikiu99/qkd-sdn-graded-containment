@@ -101,6 +101,7 @@ class NetworkState:
     # that knows which path a given session would actually take.
     hybrid_tau: float = 1.0
     hybrid_m: int = 2
+    hybrid_agg: str = "product"
     rekey_heap: list = field(default_factory=list)   # AES: (t_rekey, sid) min heap
 
     # --- ground truth (phase 3) --------------------------------------------

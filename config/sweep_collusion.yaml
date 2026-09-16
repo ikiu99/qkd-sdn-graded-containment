@@ -1,0 +1,65 @@
+# Coordinated liars: what happens to x2 when both ends of a link are
+# compromised and agree on what to report.
+#
+# x2 is a signed difference between the two endpoint reports of a link, so a
+# link with two compromised ends carries no evidence once they match. The
+# fraction of such links grows with f: on net50, 2.3% of the compromised-touching
+# links at f=0.05 and 16.8% at f=0.30. This sweep measures the detector and the
+# policies with the coordination on and off at each f.
+#
+#   python -m sim.sweep --sweep config/sweep_collusion.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: true}
+output_dir: results/raw
+variants:
+  # f=0.05 collude=false
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: false, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: false, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: false, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: false, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.05 collude=true
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: true, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: true, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: true, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: true, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.05, attack.collude: true, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.1 collude=false
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: false, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: false, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: false, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: false, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.1 collude=true
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: true, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: true, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: true, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: true, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.1, attack.collude: true, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.2 collude=false
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: false, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: false, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: false, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: false, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.2 collude=true
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: true, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: true, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: true, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: true, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.2, attack.collude: true, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.3 collude=false
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: false, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: false, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: false, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: false, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+  # f=0.3 collude=true
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: true, detector.use_prior: false, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: true, policy.type: B0, attack.enabled: false}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: true, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: true, policy.type: B1, policy.tau: 0.5}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, attack.f: 0.3, attack.collude: true, policy.type: B3, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0}
+axes:
+  attack.profile: [L]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

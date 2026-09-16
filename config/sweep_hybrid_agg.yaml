@@ -1,0 +1,40 @@
+# Does the hybrid trigger depend on how the per-node risks along a path are
+# combined?
+#
+# The trigger is 1 - prod(1 - S_i) over the interior. Two alternatives: the
+# maximum, which ignores how many relays a path crosses, and the same product
+# normalised by the interior length. The three are not comparable at a common
+# threshold, because they sit on different scales, so each is swept over its own
+# grid and the comparison is between curves of protection against key spent.
+#
+#   python -m sim.sweep --sweep config/sweep_hybrid_agg.yaml --no-assert
+base: config/attack_t3_otp.yaml
+detector: {ablation: false}
+output_dir: results/raw
+variants:
+  # matched baselines: the new config fields change the scenario hash,
+  # so these rows cannot be borrowed from an earlier sweep
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B0, attack.enabled: true}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B0, attack.enabled: false}
+  # aggregation: product
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.2, policy.hybrid_agg: product, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.35, policy.hybrid_agg: product, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.5, policy.hybrid_agg: product, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.7, policy.hybrid_agg: product, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+  # aggregation: max
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.15, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.2, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.25, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.3, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.4, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.55, policy.hybrid_agg: max, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+  # aggregation: mean
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.1, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.15, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.2, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.25, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.3, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+- {topology.name: net50, topology.path: data/topologies/net50.json, demand.km_mode: OTP, demand.lam: 0.228407, policy.type: B8, policy.hybrid_tau: 0.4, policy.hybrid_agg: mean, policy.S_iso: 0.5, policy.rho_start: 0.1316, policy.kappa: 0.0, policy.m_paths: 2}
+axes:
+  attack.profile: [P, G, L, E]
+  seed_attack: [3, 13, 23, 33, 43, 53, 63, 73, 83, 93, 103, 113, 123, 133, 143, 153, 163, 173, 183, 193]

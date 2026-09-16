@@ -29,7 +29,7 @@ INF = float("inf")
 
 
 
-def path_risk(S_bar: np.ndarray, interior) -> float:
+def path_risk(S_bar: np.ndarray, interior, agg: str = "product") -> float:
     """Probability that a path carries at least one compromised relay.
 
         P = 1 - prod over interior nodes of (1 - S_bar_i)
@@ -45,12 +45,17 @@ def path_risk(S_bar: np.ndarray, interior) -> float:
     is swept rather than derived, so nothing rests on the calibration being
     exact.
     """
-    if not len(interior):
+    s = np.clip(np.asarray([S_bar[k] for k in interior], dtype=float), 0.0, 1.0)
+    if s.size == 0:
         return 0.0
-    clean = 1.0
-    for j in interior:
-        clean *= 1.0 - min(max(float(S_bar[j]), 0.0), 1.0)
-    return 1.0 - clean
+    if agg == "max":
+        # ignores path length: one bad relay reads the same as a chain of them
+        return float(s.max())
+    if agg == "mean":
+        # the product form divided out by the interior count, so a long path is
+        # not penalised for being long
+        return float(1.0 - np.exp(np.log1p(-np.minimum(s, 0.999)).mean()))
+    return float(1.0 - np.prod(1.0 - s))
 
 
 def session_is_exposed(s: Session, comp: np.ndarray) -> tuple[bool, bool]:
@@ -182,7 +187,8 @@ class SessionManager:
             # it is too likely to carry a compromised relay, spend key on XOR
             # redundancy instead; if the graph cannot supply the legs, fall
             # through and take this path anyway rather than refuse service.
-            if state.hybrid_tau < 1.0 and path_risk(state.S_bar, inner) > state.hybrid_tau:
+            if state.hybrid_tau < 1.0 and path_risk(
+                    state.S_bar, inner, state.hybrid_agg) > state.hybrid_tau:
                 self.n_hybrid_triggered += 1
                 legs = route_table.disjoint_paths(req.src, req.dst, state.hybrid_m)
                 if legs and not any(state.isolated[j]

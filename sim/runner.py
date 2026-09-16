@@ -179,7 +179,7 @@ def simulate(cfg: SimConfig, *, write: bool = True, asserts: bool = True,
                 state.rho = decision.rho
                 state.isolated = decision.isolated
                 state.n_paths = decision.n_paths
-                state.hybrid_tau, state.hybrid_m = decision.hybrid
+                state.hybrid_tau, state.hybrid_m, state.hybrid_agg = decision.hybrid
                 if cfg.policy.tear_down_on_isolate and decision.isolated.any():
                     n_cut += session_mgr.tear_down_through(
                         state, np.flatnonzero(decision.isolated), t)

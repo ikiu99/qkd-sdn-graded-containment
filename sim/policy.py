@@ -47,7 +47,7 @@ class PolicyDecision:
     n_flips: int = 0         # isolation state changes this tick
     counters: dict = field(default_factory=dict)
     edge_cost: object = None  # per-edge routing multiplier, or None
-    hybrid: tuple = (1.0, 1)  # (risk trigger, legs) for per-session redundancy
+    hybrid: tuple = (1.0, 1, "product")   # (trigger, legs, path-risk aggregation)
 
 
 # shared mechanics, as pure functions so they can be tested without a simulator
@@ -160,12 +160,12 @@ class BasePolicy(Policy):
     def n_paths(self) -> int:
         return 1
 
-    def hybrid(self) -> tuple[float, int]:
-        """(trigger, legs) for a policy that decides redundancy per session.
+    def hybrid(self) -> tuple[float, int, str]:
+        """(trigger, legs, aggregation) for a policy deciding redundancy per session.
 
         A trigger of 1.0 never fires, which is every policy but B8.
         """
-        return 1.0, 1
+        return 1.0, 1, "product"
 
     def edge_cost(self, state=None):
         """Per-edge routing cost multiplier, or None to leave it at one.
@@ -382,8 +382,9 @@ class HybridPolicy(GradedPolicy):
     def n_paths(self) -> int:
         return 1                      # the trigger decides, per session
 
-    def hybrid(self) -> tuple[float, int]:
-        return float(self.cfg.hybrid_tau), int(self.cfg.m_paths)
+    def hybrid(self) -> tuple[float, int, str]:
+        return (float(self.cfg.hybrid_tau), int(self.cfg.m_paths),
+                str(self.cfg.hybrid_agg))
 
 
 class OraclePolicy(BasePolicy):

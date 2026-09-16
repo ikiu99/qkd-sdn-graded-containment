@@ -25,6 +25,7 @@ SELECTIONS = ("random", "top_keyflow")
 FEATURE_NAMES = ("x1", "x2", "x3")
 X1_MODES = ("signed", "abs", "cusum")
 ROUTE_MODES = ("exp", "logrisk")
+HYBRID_AGGS = ("product", "max", "mean")
 X2_MODES = ("signed", "abs")
 
 
@@ -74,6 +75,7 @@ class AttackConfig:
     delta: float = 0.50             # L intensity
     q: float = 0.03                 # E: QBER increase, absolute
     s: float = 0.25                 # E: relative SKR drop
+    collude: bool = False           # L: paired ends report one agreed number
 
 
 @dataclass(frozen=True)
@@ -208,6 +210,10 @@ class PolicyConfig:
     # that its cheapest single path carries a compromised relay exceeds this.
     # 1.0 disables the trigger (never redundant), 0.0 makes B8 into B2.
     hybrid_tau: float = 0.35  # also cut sessions already in flight
+    # how the per-node risks along a path combine into one trigger value.
+    # "product" is 1 - prod(1 - S_i), "max" the worst single relay, "mean"
+    # the product form normalised by the interior length.
+    hybrid_agg: str = "product"
 
 
 @dataclass(frozen=True)
@@ -417,6 +423,8 @@ def validate(cfg: SimConfig) -> None:
     p = cfg.policy
     if p.route_mode not in ROUTE_MODES:
         raise ValueError(f"policy.route_mode must be one of {ROUTE_MODES}")
+    if p.hybrid_agg not in HYBRID_AGGS:
+        raise ValueError(f"policy.hybrid_agg must be one of {HYBRID_AGGS}")
     if not 0.0 <= p.hybrid_tau <= 1.0:
         raise ValueError("policy.hybrid_tau must be in [0, 1]")
     if not 0.0 <= p.alpha_key <= 1.0:
