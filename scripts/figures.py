@@ -116,9 +116,17 @@ def panel_tags(axes, y=1.02):
 
 
 def cell(df, *, topo="net50", km="OTP", f=0.10, spec=True, prior=None,
-         load=True, alpha=0.05, noise=1.0, selection="random", x2="signed", x1="signed"):
+         load=True, alpha=0.05, noise=1.0, selection="random", x2="signed",
+         x1="signed", collude=False, teardown=False):
     """Pin the central cell; pass None to any argument to relax that pin."""
     d = df
+    if collude is not None and "attack.collude" in d.columns:
+        d = d[d["attack.collude"].astype(bool) == collude]
+    # Tearing down sessions already in flight is a controller design choice with
+    # a measured effect (F18), so the central cell has to sit on one side of it.
+    # The default is to drain rather than evict.
+    if teardown is not None and "policy.tear_down_on_isolate" in d.columns:
+        d = d[d["policy.tear_down_on_isolate"].astype(bool) == teardown]
     if x2 is not None:
         d = d[d["detector.x2_mode"] == x2]
     if x1 is not None:
@@ -148,11 +156,32 @@ def cell(df, *, topo="net50", km="OTP", f=0.10, spec=True, prior=None,
     return d
 
 
+# Policy knobs and the value a figure gets if it does not ask for one. Anything
+# a caller leaves unpinned is pinned here instead, so that adding a sweep over a
+# knob cannot silently turn some other figure's operating point into an average
+# over it. Pass None for a knob to opt out and average deliberately.
+OP_DEFAULTS = {
+    "B1": {"policy.tau": 0.5},
+    "B2": {"policy.m_paths": 2},
+    "B3": {"policy.S_iso": 0.5, "policy.rho_start": QUIET, "policy.kappa": 0.0},
+    "B5": {"policy.beta_trust": 50.0},
+    "B6": {"policy.m_paths": 2},
+    "B7": {"policy.alpha_key": 0.5},
+    "B8": {"policy.S_iso": 0.5, "policy.rho_start": QUIET, "policy.kappa": 0.0,
+           "policy.m_paths": 2},
+    "BT": {},
+}
+
+
 def op(d, pol, **kw):
     """One policy at one operating point. Without this every B3 curve is an
     average over four rho_start anchors, which is not an operating point."""
     d = d[d["policy.type"] == pol]
-    for k, v in kw.items():
+    pins = dict(OP_DEFAULTS.get(pol, {}))
+    pins.update(kw)
+    for k, v in pins.items():
+        if v is None or k not in d.columns:
+            continue
         d = d[np.isclose(d[k].astype(float), v)]
     return d
 
@@ -496,10 +525,15 @@ def fig_targeting(df):
     # Sixteen graded operating points is more rows than anyone reads, and the
     # frontier figure already carries the full grid; keep the ones the text
     # discusses so the bars stay distinguishable.
-    keep_b3 = {(0.4, 0.0), (0.4, QUIET), (0.5, 0.0), (0.5, QUIET), (0.9, QUIET)}
+    # One isolation point per throttle anchor is enough: the anchor is what the
+    # figure is about and the isolation point moves a row by a few hundredths.
+    keep_b3 = {(0.5, 0.0), (0.5, QUIET)}
+    keep_b1 = {0.5}
     rows = []
     for lab, pol, r in pts:
         if pol == "BT":
+            continue
+        if pol == "B1" and float(r["policy.tau"].iloc[0]) not in keep_b1:
             continue
         if pol == "B3":
             si = float(r["policy.S_iso"].iloc[0])
@@ -510,7 +544,7 @@ def fig_targeting(df):
         drr, cost = r["drr_relay"].mean(), r["dRR"].mean()
         rows.append((lab, pol, drr, float(np.interp(cost, bx, by))))
     rows.sort(key=lambda t: t[2] - t[3])
-    fig, ax = plt.subplots(figsize=(7.0, 6.2))
+    fig, ax = plt.subplots(figsize=(7.4, 2.9))
     y = np.arange(len(rows))
     ax.barh(y, [r[3] for r in rows], color="0.82",
             label="free: any policy refusing as much traffic gets this")
@@ -520,13 +554,13 @@ def fig_targeting(df):
     for i, r in enumerate(rows):
         ax.text(r[2] + 0.012, i, f"{r[2] - r[3]:+.3f}", va="center", fontsize=7,
                 color=C[r[1]])
-    ax.set_yticks(y, [r[0] for r in rows], fontsize=7)
+    ax.set_yticks(y, [r[0] for r in rows], fontsize=7.5)
     ax.set_xlabel("Damage prevented, split by where it came from")
     ax.set_xlim(0, 1.14)
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.11), ncol=2,
-              fontsize=8)
-    ax.set_title("Q: how much of the benefit is aiming, and how much is\n"
-                 "just admitting less traffic?", fontsize=10.5)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24), ncol=2,
+              fontsize=7.5)
+    ax.set_title("Q: how much of the benefit is aiming, and how much is just\n"
+                 "admitting less traffic?", fontsize=10)
     save(fig, "f07_targeting.png", "targeting benefit over the blind control")
 
 
@@ -1224,6 +1258,11 @@ def fig_hybrid(df):
     """
     d = cell(df)
     d = d[np.isclose(d["demand.T_s_max"], 600.0)]
+    # The aggregation study swept max and mean over their own trigger grids,
+    # which live on different scales. Pooling the three here would draw the
+    # union of three grids as one curve; the paper's policy is the product form.
+    if "policy.hybrid_agg" in d.columns:
+        d = d[(d["policy.type"] != "B8") | (d["policy.hybrid_agg"] == "product")]
     if not (d["policy.type"] == "B8").any():
         print("  f20 skipped: hybrid sweep not on disk")
         return
