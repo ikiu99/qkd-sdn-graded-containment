@@ -658,11 +658,12 @@ def fig_quiet(df):
 # Relaxing topo to None and then selecting nsfnet would therefore keep net50's
 # lam and drop every nsfnet row - which is exactly how the topology cells went
 # missing from the first version of this figure.
+# NSFNET, USNET and the AES key mode were dropped from this figure: all three
+# moved both policies together without separating them, so they cost a column
+# each and answered nothing the remaining eleven do not. They are still swept,
+# and scripts/analyze.py --ofat still prints them.
 OFAT_CELLS = [
     ("baseline setup", {}),
-    ("NSFNET, 14 nodes", {"topo": "nsfnet"}),
-    ("US mesh, 24 nodes", {"topo": "usnet"}),
-    ("AES re-keying", {"km": "AES"}),
     ("5% relays taken", {"f": 0.05}),
     ("20% relays taken", {"f": 0.20}),
     ("30% relays taken", {"f": 0.30}),
@@ -746,10 +747,10 @@ def fig_ofat(df):
                        fontsize=7.5)
     fig.suptitle("Q: does the result survive changing the network, the "
                  "traffic, the noise?\nA: yes. Against the greedy attacker the "
-                 "threshold policy is on the floor in all fourteen,\n"
+                 "threshold policy is on the floor in all eleven,\n"
                  "even in the cell where the detector sees it best",
                  y=1.02, fontsize=10.5)
-    save(fig, "f10_ofat.png", "14 OFAT cells, B1 vs B3, AUC overlaid")
+    save(fig, "f10_ofat.png", "11 OFAT cells, B1 vs B3, AUC overlaid")
 
 
 def fig_f_curve(df):
