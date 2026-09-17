@@ -52,7 +52,7 @@ re-running the sweeps from scratch.
 | `sim/` | the simulator: topology, key generation, demand, routing, attack, detector, policies |
 | `scripts/` | sweeps, analysis and figure generation |
 | `config/` | run and sweep configurations |
-| `tests/` | 129 tests, including validation against closed-form models |
+| `tests/` | 137 tests, including validation against closed-form models |
 | `results/analysis.parquet` | aggregated results; every figure and table is built from this |
 | `docs/related_work.md` | sources behind the model parameters |
 
