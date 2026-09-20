@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "qkd-sdn-sim"
 version = "0.2.0"
-description = "SDN-based preemptive mitigation for compromised trusted relays in QKD networks - Phase 2 core simulator (no defense)"
+description = "Simulator and analysis for graded detection and containment of compromised trusted relays in SDN-controlled QKD networks"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26",

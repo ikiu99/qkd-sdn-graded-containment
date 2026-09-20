@@ -1,4 +1,4 @@
-# Raw per-run outputs: ~19,500 parquet files, about 1 GB.  They are regenerated
+# Raw per-run outputs: ~28,700 parquet files, about 1.4 GB.  They are regenerated
 # by `python -m sim.sweep` (see README) and every figure and table in the paper
 # is built from results/analysis.parquet, which IS tracked.
 results/raw/

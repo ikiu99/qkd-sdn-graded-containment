@@ -34,10 +34,10 @@ overwrites the input with a re-derived copy.
 
 ## Level 3 — re-run the simulator from scratch (hours)
 
-`results/analysis.parquet` is an aggregation of about 19,500 individual runs,
-each a separate parquet file of roughly 50 kB. Those raw files are not tracked:
-they total about 1 GB, which is more than a git repository should carry, and
-they are fully determined by the configuration files that generated them.
+`results/analysis.parquet` is an aggregation of 28,662 individual runs, each a
+separate parquet file of roughly 50 kB. Those raw files are not tracked: they
+total about 1.4 GB, which is more than a git repository should carry, and they
+are fully determined by the configuration files that generated them.
 
 To rebuild them:
 
@@ -59,6 +59,11 @@ python -m sim.sweep --sweep config/sweep_p8_weights.yaml   --no-assert
 python -m sim.sweep --sweep config/sweep_noise.yaml        --no-assert
 python -m sim.sweep --sweep config/sweep_alpha.yaml        --no-assert
 
+# added with the reviewer response
+python -m sim.sweep --sweep config/sweep_collusion.yaml     --no-assert
+python -m sim.sweep --sweep config/sweep_hybrid_agg.yaml    --no-assert
+python -m sim.sweep --sweep config/sweep_joint_minimax.yaml --no-assert
+
 # then aggregate
 python scripts/analyze.py --pattern "results/raw/*.parquet" --out results/analysis.parquet
 ```
@@ -71,6 +76,16 @@ it.
 Every run is named by a hash of its full resolved configuration, so two runs
 with identical settings are the same file and the sweeps above can be issued in
 any order.
+
+### Selecting a cell
+
+`cell()` in `scripts/figures.py` pins every categorical mode at the value the
+paper uses: the coordinated-liar flag, the session-teardown choice, the
+path-risk aggregation and the routing objective. `op()` does the same for every
+policy knob a caller does not name. Both exist because each of those axes was
+added by a study that selects on it, and each one, left unpinned, turned some
+unrelated figure's operating point into an average over a variant that study
+measured and rejected. Pass `None` to relax a pin deliberately.
 
 ### Runs that are deliberately not part of the pool
 
@@ -87,9 +102,10 @@ the pool the figures average over.
 pytest
 ```
 
-129 tests. They cover key conservation, the routing and admission logic against
+137 tests. They cover key conservation, the routing and admission logic against
 closed-form models, the damage accounting identity, the XOR multipath truth
-table, and the calibration solver.
+table, the calibration solver, the coordinated-liar path and the three
+path-risk aggregations.
 
 ---
 
@@ -120,9 +136,12 @@ Exact versions the paper was produced with are pinned in
 | Fig. 4, hybrid policy | `fig_hybrid` | `sweep_struct` |
 | Fig. 5, one factor at a time | `fig_ofat` | `sweep_p6_ofat`, `sweep_ofat_prior_off` |
 | Table 1, parameters | — | — |
-| Table 2, worst case | `scripts/analyze.py --minimax` | `sweep_minimax` |
-| Table 3, baselines | `scripts/analyze.py --baselines` | `sweep_baselines` |
-| Table 4, hybrid | `scripts/report_struct.py` | `sweep_struct` |
+| Table 2, published baselines | `scripts/analyze.py --baselines` | `sweep_baselines` |
+| Table 3, hybrid policy | `scripts/report_struct.py` | `sweep_struct` |
+
+The minimax worst cases had a table of their own until the manuscript was cut
+back; Figure 1 carries them now, with each policy's worst case marked on its
+curve. `scripts/analyze.py --minimax` still prints them.
 
 `scripts/figures.py` also produces several figures that are not in the paper;
 they were how the results were checked and regenerate from the same file.
